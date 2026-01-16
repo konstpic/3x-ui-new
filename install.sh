@@ -22,9 +22,11 @@ NC='\033[0m' # No Color
 DEFAULT_PANEL_PORT=2053
 DEFAULT_SUB_PORT=2096
 DEFAULT_DB_PASSWORD="change_this_password"
+DEFAULT_NODE_PORT=8080
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="$SCRIPT_DIR"
+NODE_DIR="$SCRIPT_DIR/node"
 COMPOSE_FILE="docker-compose.yml"
 
 # Print banner
@@ -628,6 +630,455 @@ EOF
     print_success "Docker Compose file created with bridge network mode!"
 }
 
+# ============================================
+# NODE FUNCTIONS
+# ============================================
+
+# Create node docker-compose.yml with host network
+create_node_compose_host() {
+    local node_port="$1"
+    
+    cat > "$NODE_DIR/$COMPOSE_FILE" << EOF
+services:
+  node:
+    image: registry.konstpic.ru/3x-ui/node:3.0.0b
+    container_name: 3x-ui-node
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - \$PWD/bin/config.json:/app/bin/config.json
+      - \$PWD/bin/node-config.json:/app/bin/node-config.json
+      - \$PWD/logs:/app/logs
+      - \$PWD/cert:/app/cert
+    environment:
+      - NODE_TLS_CERT_FILE=/app/cert/fullchain.pem
+      - NODE_TLS_KEY_FILE=/app/cert/privkey.pem
+EOF
+    
+    print_success "Node Docker Compose file created with host network mode!"
+}
+
+# Create node docker-compose.yml with bridge network (port mapping)
+create_node_compose_bridge() {
+    local node_port="$1"
+    
+    cat > "$NODE_DIR/$COMPOSE_FILE" << EOF
+services:
+  node:
+    image: registry.konstpic.ru/3x-ui/node:3.0.0b
+    container_name: 3x-ui-node
+    restart: unless-stopped
+    ports:
+      - "$node_port:8080"  # API port (connect to panel)
+      # Add inbound ports as needed:
+      # - "443:443"
+      # - "8443:8443"
+    volumes:
+      - \$PWD/bin/config.json:/app/bin/config.json
+      - \$PWD/bin/node-config.json:/app/bin/node-config.json
+      - \$PWD/logs:/app/logs
+      - \$PWD/cert:/app/cert
+    environment:
+      - NODE_TLS_CERT_FILE=/app/cert/fullchain.pem
+      - NODE_TLS_KEY_FILE=/app/cert/privkey.pem
+    networks:
+      - node_network
+
+networks:
+  node_network:
+    driver: bridge
+EOF
+    
+    print_success "Node Docker Compose file created with bridge network mode!"
+}
+
+# Save node configuration
+save_node_config() {
+    local node_port="$1"
+    local network_mode="$2"
+    local cert_type="$3"
+    local domain_or_ip="$4"
+    
+    cat > "$NODE_DIR/.node-config" << EOF
+# 3X-UI Node Configuration
+# Generated: $(date)
+
+NODE_PORT=$node_port
+NETWORK_MODE=$network_mode
+CERT_TYPE=$cert_type
+DOMAIN_OR_IP=$domain_or_ip
+NODE_DIR=$NODE_DIR
+EOF
+    
+    chmod 600 "$NODE_DIR/.node-config"
+}
+
+# Load node configuration
+load_node_config() {
+    if [[ -f "$NODE_DIR/.node-config" ]]; then
+        source "$NODE_DIR/.node-config"
+        return 0
+    fi
+    return 1
+}
+
+# Start node services
+start_node_services() {
+    print_info "Starting Node services..."
+    cd "$NODE_DIR"
+    docker compose up -d
+    
+    # Wait for services to start
+    sleep 3
+    
+    if docker compose ps | grep -q "Up"; then
+        print_success "Node started successfully!"
+    else
+        print_error "Failed to start node. Check logs with: docker compose logs"
+        return 1
+    fi
+}
+
+# Stop node services
+stop_node_services() {
+    print_info "Stopping Node services..."
+    cd "$NODE_DIR"
+    docker compose down
+    print_success "Node stopped!"
+}
+
+# Update node
+update_node() {
+    print_info "Updating Node..."
+    cd "$NODE_DIR"
+    
+    print_info "Step 1/3: Stopping container..."
+    docker compose down
+    
+    print_info "Step 2/3: Pulling new image..."
+    docker compose pull
+    
+    print_info "Step 3/3: Starting container..."
+    docker compose up -d
+    
+    # Cleanup old images
+    print_info "Cleaning up old images..."
+    docker image prune -f
+    
+    print_success "Node updated successfully!"
+}
+
+# Show node status
+show_node_status() {
+    print_info "Node Service Status:"
+    echo ""
+    cd "$NODE_DIR"
+    docker compose ps
+    echo ""
+    
+    if load_node_config; then
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${WHITE}Configuration:${NC}"
+        echo -e "  Node Port:     ${GREEN}$NODE_PORT${NC}"
+        echo -e "  Network Mode:  ${GREEN}$NETWORK_MODE${NC}"
+        echo -e "  Certificate:   ${GREEN}$CERT_TYPE${NC}"
+        echo -e "  Domain/IP:     ${GREEN}$DOMAIN_OR_IP${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        
+        if [[ "$CERT_TYPE" != "none" ]]; then
+            echo ""
+            echo -e "${WHITE}SSL paths for node:${NC}"
+            echo -e "  Certificate:  ${CYAN}/app/cert/fullchain.pem${NC}"
+            echo -e "  Private Key:  ${CYAN}/app/cert/privkey.pem${NC}"
+        fi
+    fi
+}
+
+# Node installation wizard
+install_node_wizard() {
+    print_banner
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${WHITE}          3X-UI Node Installation Wizard${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    
+    check_root
+    check_system
+    
+    # Step 1: Install Docker
+    echo ""
+    echo -e "${PURPLE}[Step 1/4]${NC} Docker Installation"
+    install_docker
+    install_docker_compose
+    
+    # Step 2: Network mode
+    echo ""
+    echo -e "${PURPLE}[Step 2/4]${NC} Network Configuration"
+    echo -e "${CYAN}Choose network mode:${NC}"
+    echo "1) Host network (recommended for nodes)"
+    echo "   - Direct access to all ports"
+    echo "   - Better performance"
+    echo ""
+    echo "2) Bridge network with port mapping"
+    echo "   - Isolated container"
+    echo "   - Need to expose inbound ports manually"
+    echo ""
+    read -p "Select [1-2, default: 1]: " network_choice
+    network_choice=${network_choice:-1}
+    
+    local network_mode="host"
+    if [[ "$network_choice" == "2" ]]; then
+        network_mode="bridge"
+    fi
+    
+    # Step 3: Port configuration (only for bridge mode)
+    local node_port=$DEFAULT_NODE_PORT
+    if [[ "$network_mode" == "bridge" ]]; then
+        echo ""
+        echo -e "${PURPLE}[Step 3/4]${NC} Port Configuration"
+        read -p "Node API port [$DEFAULT_NODE_PORT]: " node_port
+        node_port=${node_port:-$DEFAULT_NODE_PORT}
+        
+        if ! [[ "$node_port" =~ ^[0-9]+$ ]] || [ "$node_port" -lt 1 ] || [ "$node_port" -gt 65535 ]; then
+            print_error "Invalid port!"
+            exit 1
+        fi
+    else
+        echo ""
+        echo -e "${PURPLE}[Step 3/4]${NC} Port Configuration"
+        echo -e "${YELLOW}Using host network - node will listen on port 8080 by default${NC}"
+        node_port=8080
+    fi
+    
+    # Step 4: SSL Certificate
+    echo ""
+    echo -e "${PURPLE}[Step 4/4]${NC} SSL Certificate Configuration"
+    local server_ip=$(get_server_ip)
+    echo -e "Your server IP: ${GREEN}$server_ip${NC}"
+    
+    local detected_ipv6=$(get_server_ipv6)
+    if [[ -n "$detected_ipv6" ]]; then
+        echo -e "Your server IPv6: ${GREEN}$detected_ipv6${NC}"
+    fi
+    
+    # Create node directory structure
+    mkdir -p "$NODE_DIR/cert"
+    mkdir -p "$NODE_DIR/bin"
+    mkdir -p "$NODE_DIR/logs"
+    
+    # Create default config files if not exist
+    if [[ ! -f "$NODE_DIR/bin/config.json" ]]; then
+        cat > "$NODE_DIR/bin/config.json" << 'NODECONFIG'
+{
+    "log": {
+      "access": "none",
+      "dnsLog": false,
+      "error": "",
+      "loglevel": "warning",
+      "maskAddress": ""
+    },
+    "api": {
+      "tag": "api",
+      "services": [
+        "HandlerService",
+        "LoggerService",
+        "StatsService"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "api",
+        "listen": "127.0.0.1",
+        "port": 62789,
+        "protocol": "tunnel",
+        "settings": {
+          "address": "127.0.0.1"
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "AsIs",
+          "redirect": "",
+          "noises": []
+        }
+      },
+      {
+        "tag": "blocked",
+        "protocol": "blackhole",
+        "settings": {}
+      }
+    ],
+    "policy": {
+      "levels": {
+        "0": {
+          "statsUserDownlink": true,
+          "statsUserUplink": true
+        }
+      },
+      "system": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      }
+    },
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "inboundTag": [
+            "api"
+          ],
+          "outboundTag": "api"
+        },
+        {
+          "type": "field",
+          "outboundTag": "blocked",
+          "ip": [
+            "geoip:private"
+          ]
+        },
+        {
+          "type": "field",
+          "outboundTag": "blocked",
+          "protocol": [
+            "bittorrent"
+          ]
+        }
+      ]
+    },
+    "stats": {},
+    "metrics": {
+      "tag": "metrics_out",
+      "listen": "127.0.0.1:11111"
+    }
+  }
+NODECONFIG
+    fi
+    
+    if [[ ! -f "$NODE_DIR/bin/node-config.json" ]]; then
+        echo '{}' > "$NODE_DIR/bin/node-config.json"
+    fi
+    
+    # Initialize SSL variables
+    SSL_HOST="$server_ip"
+    CERT_TYPE="none"
+    
+    # Interactive SSL setup (reuse existing function but with NODE_DIR)
+    local original_install_dir="$INSTALL_DIR"
+    INSTALL_DIR="$NODE_DIR"
+    prompt_and_setup_ssl "$NODE_DIR/cert" "$server_ip"
+    INSTALL_DIR="$original_install_dir"
+    
+    local cert_type="$CERT_TYPE"
+    local domain_or_ip="$SSL_HOST"
+    
+    # Create docker-compose
+    echo ""
+    print_info "Creating Docker Compose configuration..."
+    
+    if [[ "$network_mode" == "host" ]]; then
+        create_node_compose_host "$node_port"
+    else
+        create_node_compose_bridge "$node_port"
+    fi
+    
+    # Save configuration
+    save_node_config "$node_port" "$network_mode" "$cert_type" "$domain_or_ip"
+    
+    # Start services
+    start_node_services
+    
+    # Final summary
+    print_banner
+    echo ""
+    echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║            Node Installation Completed Successfully!         ║${NC}"
+    echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${WHITE}Node is now running!${NC}"
+    echo -e "  API Port: ${GREEN}$node_port${NC}"
+    echo -e "  Network:  ${GREEN}$network_mode${NC}"
+    echo ""
+    
+    if [[ "$cert_type" != "none" ]]; then
+        echo -e "${GREEN}✓ SSL certificate issued and saved to node/cert/ folder${NC}"
+        if [[ "$cert_type" == "letsencrypt-ip" ]]; then
+            echo -e "${YELLOW}  (IP certificate valid ~6 days, auto-renews via acme.sh)${NC}"
+        elif [[ "$cert_type" == "letsencrypt-domain" ]]; then
+            echo -e "${YELLOW}  (domain certificate valid 90 days, auto-renews via acme.sh)${NC}"
+        fi
+        echo ""
+    fi
+    
+    echo -e "${WHITE}To connect this node to the panel:${NC}"
+    echo -e "  1. Open panel web interface"
+    echo -e "  2. Go to Node Management"
+    echo -e "  3. Add new node with address: ${CYAN}$server_ip:$node_port${NC}"
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${WHITE}Management:${NC}"
+    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
+    echo ""
+}
+
+# Renew node certificate
+renew_node_certificate() {
+    if ! load_node_config; then
+        print_error "Node configuration not found. Please install node first."
+        return 1
+    fi
+    
+    local cert_dir="$NODE_DIR/cert"
+    
+    # Check if acme.sh is installed
+    if ! command -v ~/.acme.sh/acme.sh &>/dev/null; then
+        print_error "acme.sh is not installed. Cannot renew certificate."
+        return 1
+    fi
+    
+    print_info "Renewing node certificate via acme.sh..."
+    
+    # Stop node to free port 80
+    cd "$NODE_DIR"
+    docker compose down 2>/dev/null || true
+    
+    if [[ "$CERT_TYPE" == "letsencrypt-domain" ]]; then
+        ~/.acme.sh/acme.sh --renew -d "$DOMAIN_OR_IP" --force
+        local acmeCertPath="/root/cert/${DOMAIN_OR_IP}"
+    else
+        ~/.acme.sh/acme.sh --renew -d "$DOMAIN_OR_IP" --force
+        local acmeCertPath="/root/cert/ip"
+    fi
+    
+    # Copy renewed certificates
+    if [[ -f "${acmeCertPath}/fullchain.pem" && -f "${acmeCertPath}/privkey.pem" ]]; then
+        cp "${acmeCertPath}/fullchain.pem" "${cert_dir}/"
+        cp "${acmeCertPath}/privkey.pem" "${cert_dir}/"
+        chmod 600 "${cert_dir}/privkey.pem"
+        chmod 644 "${cert_dir}/fullchain.pem"
+        print_success "Node certificate renewed successfully!"
+    else
+        print_error "Certificate files not found"
+    fi
+    
+    # Restart node
+    docker compose up -d
+}
+
+# ============================================
+# END NODE FUNCTIONS
+# ============================================
+
 # Save configuration
 save_config() {
     local panel_port="$1"
@@ -1162,40 +1613,48 @@ install_wizard() {
     echo -e "${GREEN}║              Installation Completed Successfully!            ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${WHITE}Configuration Summary:${NC}"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "  Installation Dir:  ${CYAN}$INSTALL_DIR${NC}"
-    echo -e "  Panel Port:        ${CYAN}$panel_port${NC}"
-    echo -e "  Subscription Port: ${CYAN}$sub_port${NC}"
-    echo -e "  Network Mode:      ${CYAN}$network_mode${NC}"
-    echo -e "  Certificate:       ${CYAN}$cert_type${NC}"
-    echo -e "  Database Password: ${CYAN}$db_password${NC}"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Access your panel:${NC}"
-    if [[ "$cert_type" == "letsencrypt-domain" ]]; then
-        echo -e "  ${GREEN}https://$domain_or_ip:$panel_port${NC}"
-    elif [[ "$cert_type" == "letsencrypt-ip" ]]; then
-        echo -e "  ${GREEN}https://$server_ip:$panel_port${NC}"
-        echo -e "  ${YELLOW}(IP certificate valid ~6 days, auto-renews via acme.sh)${NC}"
-    else
-        echo -e "  ${GREEN}http://$server_ip:$panel_port${NC}"
-    fi
+    echo -e "${WHITE}Your panel is now available at:${NC}"
+    echo -e "  ${GREEN}http://$server_ip:$panel_port${NC}"
     echo ""
-    echo -e "${WHITE}Default credentials:${NC}"
-    echo -e "  Username: ${CYAN}admin${NC}"
-    echo -e "  Password: ${CYAN}admin${NC}"
+    echo -e "${WHITE}Login credentials:${NC}"
+    echo -e "  Username:  ${CYAN}admin${NC}"
+    echo -e "  Password:  ${CYAN}admin${NC}"
     echo ""
-    echo -e "${YELLOW}⚠️  Please change default credentials after first login!${NC}"
+    echo -e "${YELLOW}⚠️  Please change your password after first login!${NC}"
     echo ""
+    
     if [[ "$cert_type" != "none" ]]; then
-        echo -e "${WHITE}SSL Certificate paths (for panel web settings):${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        echo -e "${GREEN}✓ SSL certificate issued and saved to cert/ folder${NC}"
+        if [[ "$cert_type" == "letsencrypt-ip" ]]; then
+            echo -e "${YELLOW}  (IP certificate valid ~6 days, auto-renews via acme.sh)${NC}"
+        elif [[ "$cert_type" == "letsencrypt-domain" ]]; then
+            echo -e "${YELLOW}  (domain certificate valid 90 days, auto-renews via acme.sh)${NC}"
+        fi
+        echo ""
+        echo -e "${WHITE}To enable HTTPS, add certificate paths in web panel settings:${NC}"
         echo -e "  Certificate:  ${CYAN}/app/cert/fullchain.pem${NC}"
         echo -e "  Private Key:  ${CYAN}/app/cert/privkey.pem${NC}"
         echo ""
+        echo -e "${WHITE}After configuration, panel will be available at:${NC}"
+        if [[ "$cert_type" == "letsencrypt-domain" ]]; then
+            echo -e "  ${GREEN}https://$domain_or_ip:$panel_port${NC}"
+        else
+            echo -e "  ${GREEN}https://$server_ip:$panel_port${NC}"
+        fi
+        echo ""
     fi
-    echo -e "${WHITE}Management commands:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - Open management menu"
+    
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${WHITE}Database password:${NC} ${CYAN}$db_password${NC}"
+    echo -e "${YELLOW}(save it in a secure place)${NC}"
+    echo ""
+    echo -e "${WHITE}Management:${NC}"
+    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
     echo ""
 }
 
@@ -1208,28 +1667,41 @@ main_menu() {
         echo -e "${WHITE}                    Management Menu${NC}"
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
-        echo -e "  ${GREEN}1)${NC}  Install 3X-UI"
-        echo -e "  ${GREEN}2)${NC}  Update 3X-UI"
-        echo -e "  ${GREEN}3)${NC}  Start Services"
-        echo -e "  ${GREEN}4)${NC}  Stop Services"
-        echo -e "  ${GREEN}5)${NC}  Restart Services"
-        echo -e "  ${GREEN}6)${NC}  Show Status"
-        echo -e "  ${GREEN}7)${NC}  View Logs"
+        echo -e "  ${WHITE}── Panel ──${NC}"
+        echo -e "  ${GREEN}1)${NC}  Install Panel"
+        echo -e "  ${GREEN}2)${NC}  Update Panel"
+        echo -e "  ${GREEN}3)${NC}  Start Panel"
+        echo -e "  ${GREEN}4)${NC}  Stop Panel"
+        echo -e "  ${GREEN}5)${NC}  Restart Panel"
+        echo -e "  ${GREEN}6)${NC}  Panel Status"
+        echo -e "  ${GREEN}7)${NC}  Panel Logs"
         echo ""
+        echo -e "  ${WHITE}── Panel Settings ──${NC}"
         echo -e "  ${YELLOW}8)${NC}  Change Panel Port"
         echo -e "  ${YELLOW}9)${NC}  Change Subscription Port"
         echo -e "  ${YELLOW}10)${NC} Change Database Password"
-        echo -e "  ${YELLOW}11)${NC} Renew Certificate"
-        echo -e "  ${YELLOW}12)${NC} Setup New Certificate"
+        echo -e "  ${YELLOW}11)${NC} Renew Panel Certificate"
+        echo -e "  ${YELLOW}12)${NC} Setup New Panel Certificate"
         echo ""
-        echo -e "  ${RED}13)${NC} Uninstall"
+        echo -e "  ${WHITE}── Node ──${NC}"
+        echo -e "  ${BLUE}20)${NC} Install Node"
+        echo -e "  ${BLUE}21)${NC} Update Node"
+        echo -e "  ${BLUE}22)${NC} Start Node"
+        echo -e "  ${BLUE}23)${NC} Stop Node"
+        echo -e "  ${BLUE}24)${NC} Restart Node"
+        echo -e "  ${BLUE}25)${NC} Node Status"
+        echo -e "  ${BLUE}26)${NC} Node Logs"
+        echo -e "  ${BLUE}27)${NC} Renew Node Certificate"
+        echo ""
+        echo -e "  ${RED}99)${NC} Uninstall Panel"
         echo -e "  ${WHITE}0)${NC}  Exit"
         echo ""
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
-        read -p "Select option [0-13]: " choice
+        read -p "Select option: " choice
         
         case $choice in
+            # Panel options
             1) install_wizard ;;
             2) update_services ;;
             3) start_services ;;
@@ -1237,7 +1709,7 @@ main_menu() {
             5) 
                 cd "$INSTALL_DIR"
                 docker compose restart
-                print_success "Services restarted!"
+                print_success "Panel restarted!"
                 ;;
             6) show_status ;;
             7) show_logs ;;
@@ -1246,7 +1718,26 @@ main_menu() {
             10) change_db_password ;;
             11) renew_certificate ;;
             12) setup_new_certificate ;;
-            13) uninstall ;;
+            
+            # Node options
+            20) install_node_wizard ;;
+            21) update_node ;;
+            22) start_node_services ;;
+            23) stop_node_services ;;
+            24) 
+                cd "$NODE_DIR"
+                docker compose restart
+                print_success "Node restarted!"
+                ;;
+            25) show_node_status ;;
+            26) 
+                cd "$NODE_DIR"
+                docker compose logs -f
+                ;;
+            27) renew_node_certificate ;;
+            
+            # Other
+            99) uninstall ;;
             0) 
                 echo -e "${GREEN}Goodbye!${NC}"
                 exit 0
@@ -1264,7 +1755,7 @@ main_menu() {
 # Script entry point
 main() {
     # Check if config exists (already installed)
-    if [[ -f "$INSTALL_DIR/.3xui-config" ]]; then
+    if [[ -f "$INSTALL_DIR/.3xui-config" ]] || [[ -f "$NODE_DIR/.node-config" ]]; then
         main_menu
     else
         # First run - check for arguments
@@ -1272,6 +1763,10 @@ main() {
             install|--install|-i)
                 check_root
                 install_wizard
+                ;;
+            node|--node|-n)
+                check_root
+                install_node_wizard
                 ;;
             menu|--menu|-m)
                 check_root
@@ -1283,9 +1778,12 @@ main() {
                 echo ""
                 echo -e "${CYAN}Welcome to 3X-UI NEW Installer!${NC}"
                 echo ""
-                echo "1) Start Installation"
-                echo "2) Open Menu (for manual configuration)"
-                echo "0) Exit"
+                echo -e "${WHITE}What would you like to install?${NC}"
+                echo ""
+                echo -e "  ${GREEN}1)${NC} Install Panel (with database)"
+                echo -e "  ${BLUE}2)${NC} Install Node (standalone)"
+                echo -e "  ${YELLOW}3)${NC} Open Menu"
+                echo -e "  ${WHITE}0)${NC} Exit"
                 echo ""
                 read -p "Select option: " first_choice
                 
@@ -1295,6 +1793,10 @@ main() {
                         install_wizard
                         ;;
                     2)
+                        check_root
+                        install_node_wizard
+                        ;;
+                    3)
                         check_root
                         main_menu
                         ;;
