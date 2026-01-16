@@ -473,6 +473,12 @@ docker-compose down
 docker-compose down -v
 ```
 
+### API Documentation
+
+For integrating with 3X-UI panel programmatically, see the complete API reference:
+
+- **[API Documentation](docs/API.md)** - REST API endpoints, authentication, examples
+
 ### Support
 
 For issues, questions, or contributions, please refer to the project repository.

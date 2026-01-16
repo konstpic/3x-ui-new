@@ -193,6 +193,7 @@ For detailed installation instructions, configuration, and migration guide, plea
 
 - **[Full English Documentation](README_EN.md)** - Complete guide in English
 - **[Полная русская документация](README_RU.md)** - Полное руководство на русском языке
+- **[API Documentation](docs/API.md)** - REST API reference / Справочник REST API
 
 ## Requirements / Требования
 
