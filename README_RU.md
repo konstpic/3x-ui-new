@@ -70,13 +70,9 @@
 
 ## Вариант 1: Автоматическая установка (Рекомендуется)
 
-### Установка одной командой
+### Установка 
 
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/konstpic/3x-ui-new/main/install.sh)
-```
-
-Или клонируйте и запустите:
+Клонируйте и запустите:
 
 ```bash
 git clone https://github.com/konstpic/3x-ui-new.git
