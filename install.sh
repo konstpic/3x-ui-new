@@ -1405,6 +1405,8 @@ reset_node() {
     echo ""
     echo "This will:"
     echo "  - Clear node-config.json (reset node to default state)"
+    echo "  - Reset config.json to default configuration"
+    echo "  - Stop and start node container"
     echo "  - Node will need to be re-registered with panel"
     echo ""
     read -p "Are you sure? [y/N]: " confirm
@@ -1418,9 +1420,103 @@ reset_node() {
     # Clear node-config.json
     echo '{}' > "$NODE_DIR/bin/node-config.json"
     
-    # Restart node
+    # Reset config.json to default
+    cat > "$NODE_DIR/bin/config.json" << 'NODECONFIG'
+{
+    "log": {
+      "access": "none",
+      "dnsLog": false,
+      "error": "",
+      "loglevel": "warning",
+      "maskAddress": ""
+    },
+    "api": {
+      "tag": "api",
+      "services": [
+        "HandlerService",
+        "LoggerService",
+        "StatsService"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "api",
+        "listen": "127.0.0.1",
+        "port": 62789,
+        "protocol": "tunnel",
+        "settings": {
+          "address": "127.0.0.1"
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "AsIs",
+          "redirect": "",
+          "noises": []
+        }
+      },
+      {
+        "tag": "blocked",
+        "protocol": "blackhole",
+        "settings": {}
+      }
+    ],
+    "policy": {
+      "levels": {
+        "0": {
+          "statsUserDownlink": true,
+          "statsUserUplink": true
+        }
+      },
+      "system": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      }
+    },
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "inboundTag": [
+            "api"
+          ],
+          "outboundTag": "api"
+        },
+        {
+          "type": "field",
+          "outboundTag": "blocked",
+          "ip": [
+            "geoip:private"
+          ]
+        },
+        {
+          "type": "field",
+          "outboundTag": "blocked",
+          "protocol": [
+            "bittorrent"
+          ]
+        }
+      ]
+    },
+    "stats": {},
+    "metrics": {
+      "tag": "metrics_out",
+      "listen": "127.0.0.1:11111"
+    }
+  }
+NODECONFIG
+    
+    # Stop and start node (instead of restart)
     cd "$NODE_DIR"
-    docker compose restart node
+    docker compose stop node
+    docker compose start node
     
     print_success "Node reset successfully! Node needs to be re-registered with panel."
 }
