@@ -1777,7 +1777,7 @@ update_services() {
     echo -e "${YELLOW}Note: Database was not restarted.${NC}"
 }
 
-# Get WebPath from database
+# Get webBasePath from database
 get_webpath_from_db() {
     local db_host=""
     local db_port="5432"
@@ -1821,19 +1821,19 @@ get_webpath_from_db() {
     db_user="${db_user:-xui_user}"
     db_name="${db_name:-xui_db}"
     
-    # Try to get WebPath from database
+    # Try to get webBasePath from database
     # First try via docker exec to postgres container
     if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^3xui_postgres$"; then
         # Use docker exec to connect to postgres container
-        webpath=$(docker exec 3xui_postgres psql -h 127.0.0.1 -p 5432 -U "$db_user" -d "$db_name" -t -c "SELECT value FROM settings WHERE key = 'WebPath';" 2>/dev/null | tr -d ' \r\n')
+        webpath=$(docker exec 3xui_postgres psql -h 127.0.0.1 -p 5432 -U "$db_user" -d "$db_name" -t -c "SELECT value FROM settings WHERE key = 'webBasePath';" 2>/dev/null | tr -d ' \r\n')
     elif command -v psql &>/dev/null && [[ "$db_host" == "127.0.0.1" ]] || [[ "$db_host" == "localhost" ]]; then
         # Try direct psql connection (for host network mode)
         export PGPASSWORD="$db_password"
-        webpath=$(psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -t -c "SELECT value FROM settings WHERE key = 'WebPath';" 2>/dev/null | tr -d ' \r\n')
+        webpath=$(psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -t -c "SELECT value FROM settings WHERE key = 'webBasePath';" 2>/dev/null | tr -d ' \r\n')
         unset PGPASSWORD
     fi
     
-    # Return WebPath or empty string
+    # Return webBasePath or empty string
     if [[ -n "$webpath" ]]; then
         echo "$webpath"
         return 0
@@ -1880,7 +1880,7 @@ get_panel_status() {
             has_cert=true
         fi
         
-        # Get WebPath from database
+        # Get webBasePath from database
         web_path=$(get_webpath_from_db)
         
         # Get port from environment, config, or default
