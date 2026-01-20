@@ -19,7 +19,7 @@ Welcome to the next generation of 3x-ui! This version brings significant improve
 
 ## Quick Start / Быстрый старт
 
-### 🚀 One-Line Install / Установка 
+### 🚀 Install / Установка 
 
 Клонируйте и запустите:
 
