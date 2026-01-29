@@ -1,7 +1,7 @@
 <div align="center">
 
-<!-- Liquid Glass Hero Section -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,3,5,30&height=300&section=header&text=3X-UI%20NEW&fontSize=70&fontAlignY=40&animation=fadeIn&fontColor=gradient&desc=Next%20Generation%20Panel%20%7C%20Multi-Node%20Management&descSize=25&descAlignY=60" width="100%"/>
+<!-- SharX Hero Section -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,3,5,30&height=300&section=header&text=SharX&fontSize=70&fontAlignY=40&animation=fadeIn&fontColor=gradient&desc=3XUI%20Fork%20%7C%20Grafana%20Integration%20%7C%20Multi-Node%20Management&descSize=25&descAlignY=60" width="100%"/>
 
 </div>
 
@@ -11,11 +11,15 @@
 
 </div>
 
-## Welcome to the New 3x-ui / Добро пожаловать в новую 3x-ui
+## Welcome to SharX / Добро пожаловать в SharX
 
-Welcome to the next generation of 3x-ui! This version brings significant improvements, a modern architecture, and a streamlined installation process using Docker containers.
+**SharX** is a fork of the original **3XUI** panel with enhanced features and monitoring capabilities.
 
-Добро пожаловать в новое поколение 3x-ui! Эта версия приносит значительные улучшения, современную архитектуру и упрощенный процесс установки с использованием Docker-контейнеров.
+**SharX** — это форк оригинальной панели **3XUI** с расширенными возможностями и функциями мониторинга.
+
+This version brings significant improvements, a modern architecture, streamlined installation process using Docker containers, and **Grafana integration** for advanced monitoring with Prometheus and Loki.
+
+Эта версия приносит значительные улучшения, современную архитектуру, упрощенный процесс установки с использованием Docker-контейнеров и **интеграцию с Grafana** для продвинутого мониторинга с Prometheus и Loki.
 
 ## Quick Start / Быстрый старт
 
@@ -172,18 +176,20 @@ sudo bash install.sh
 - **Node Mode**: One panel manages multiple nodes
 - **PostgreSQL**: Full migration from SQLite
 - **Redis Integration**: Enhanced performance with caching
-- **Modern UI**: Glass Morphism design
+- **Grafana Integration**: Advanced monitoring with Prometheus metrics and Loki logs
 - **Docker-Based**: Easy deployment with pre-built images
 - **HWID Protection**: Device identification (Beta, Happ & V2RayTun)
 - **Auto SSL**: Let's Encrypt certificates with auto-renewal
+- **Environment-Based Configuration**: Flexible domain, port, and certificate management via environment variables
 
 - **Режим узлов**: Одна панель управляет несколькими узлами
 - **PostgreSQL**: Полная миграция с SQLite
 - **Интеграция Redis**: Повышенная производительность с кэшированием
-- **Современный интерфейс**: Дизайн Glass Morphism
+- **Интеграция Grafana**: Продвинутый мониторинг с метриками Prometheus и логами Loki
 - **На основе Docker**: Легкое развертывание с предварительно собранными образами
 - **Защита HWID**: Идентификация устройств (Бета, Happ & V2RayTun)
 - **Авто SSL**: Let's Encrypt сертификаты с автопродлением
+- **Настройка через переменные окружения**: Гибкое управление доменами, портами и сертификатами через env переменные
 
 ## Documentation / Документация
 
@@ -240,7 +246,7 @@ For issues, questions, or contributions, please refer to the project repository.
 
 <div align="center">
 
-<!-- Liquid Glass Footer Section -->
+<!-- SharX Footer Section -->
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,3,5,30&height=300&section=footer&animation=fadeIn" width="100%"/>
 
 </div>
