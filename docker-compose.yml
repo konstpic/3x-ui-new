@@ -13,6 +13,22 @@ services:
       # Xray settings
       XRAY_VMESS_AEAD_FORCED: "false"
       XUI_ENABLE_FAIL2BAN: "true"
+      # XUI_LOG_LEVEL: "debug"
+      
+      # Web Panel настройки (только через env, не доступны в UI)
+      # XUI_WEB_PORT: 2053
+      # XUI_WEB_LISTEN: 0.0.0.0
+      # XUI_WEB_DOMAIN: panel.example.com
+      # XUI_WEB_BASE_PATH: /
+      # XUI_WEB_CERT_FILE: /app/cert/fullchain.pem
+      # XUI_WEB_KEY_FILE: /app/cert/privkey.pem
+      
+      # Subscription настройки (только через env, не доступны в UI)
+      # XUI_SUB_PORT: 2096
+      # XUI_SUB_PATH: /sub/
+      # XUI_SUB_DOMAIN: sub.example.com
+      # XUI_SUB_CERT_FILE: /app/cert/sub-fullchain.pem
+      # XUI_SUB_KEY_FILE: /app/cert/sub-privkey.pem
       
       # PostgreSQL settings
       XUI_DB_HOST: postgres
@@ -40,7 +56,7 @@ services:
       POSTGRES_PASSWORD: change_this_password
       POSTGRES_DB: xui_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - $PWD/postgres_data:/var/lib/postgresql/data
     networks:
       - xui_network
     restart: unless-stopped
@@ -54,6 +70,3 @@ services:
 networks:
   xui_network:
     driver: bridge
-
-volumes:
-  postgres_data:

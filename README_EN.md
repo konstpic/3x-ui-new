@@ -1,10 +1,12 @@
-# 3x-ui New
+# SharX
 
 [English](README_EN.md) | [Русский](README_RU.md)
 
-## Welcome to the New 3x-ui
+## Welcome to SharX
 
-Welcome to the next generation of 3x-ui! This version brings significant improvements, a modern architecture, and a streamlined installation process using Docker containers.
+**SharX** is a fork of the original **3XUI** panel with enhanced features and monitoring capabilities.
+
+This version brings significant improvements, a modern architecture, streamlined installation process using Docker containers, and **Grafana integration** for advanced monitoring with Prometheus and Loki.
 
 ## What's New
 
@@ -37,10 +39,11 @@ Welcome to the next generation of 3x-ui! This version brings significant improve
 - **Migration Tool**: Built-in migration tool from SQLite to PostgreSQL supports existing users
 - **Data Integrity**: Full and reliable data transfer during migration process
 
-### New Modern UI Theme
-- **Glass Morphism Design**: Beautiful, modern glass morphism-style interface
-- **Improved User Experience**: Intuitive and responsive design
-- **Better Visual Hierarchy**: Clear and organized interface elements
+### Grafana Integration
+- **Prometheus Metrics**: Real-time metrics collection and monitoring
+- **Loki Logs**: Centralized log aggregation and analysis
+- **Advanced Monitoring**: Comprehensive dashboards for system performance
+- **Alerting**: Configurable alerts based on metrics and logs
 
 ### New Distribution Model
 - **Docker-Based**: Pre-built Docker images for easy deployment
@@ -363,6 +366,109 @@ To change these settings, update the environment variables in `docker-compose.ym
 
 Redis is automatically configured and integrated. No additional setup is required.
 
+#### Environment Variables Configuration
+
+SharX supports comprehensive configuration through environment variables. These settings are **only available via environment variables** and cannot be changed through the web UI.
+
+**Web Panel Settings:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `XUI_WEB_PORT` | Web panel port | `2053` | `2053` |
+| `XUI_WEB_LISTEN` | IP address to listen on | - | `0.0.0.0` |
+| `XUI_WEB_DOMAIN` | Web panel domain | - | `panel.example.com` |
+| `XUI_WEB_BASE_PATH` | Base URL path | `/` | `/` |
+| `XUI_WEB_CERT_FILE` | SSL certificate path | - | `/app/cert/fullchain.pem` |
+| `XUI_WEB_KEY_FILE` | SSL private key path | - | `/app/cert/privkey.pem` |
+
+**Subscription Service Settings:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `XUI_SUB_PORT` | Subscription service port | `2096` | `2096` |
+| `XUI_SUB_PATH` | Subscription URI path | `/sub/` | `/sub/` |
+| `XUI_SUB_DOMAIN` | Subscription domain | - | `sub.example.com` |
+| `XUI_SUB_CERT_FILE` | SSL certificate path for subscription | - | `/app/cert/sub-fullchain.pem` |
+| `XUI_SUB_KEY_FILE` | SSL private key path for subscription | - | `/app/cert/sub-privkey.pem` |
+
+**PostgreSQL Database Settings:**
+
+| Variable | Description | Default | Required | Example |
+|----------|-------------|---------|----------|---------|
+| `XUI_DB_HOST` | PostgreSQL host | `localhost` | No | `postgres` |
+| `XUI_DB_PORT` | PostgreSQL port | `5432` | No | `5432` |
+| `XUI_DB_USER` | PostgreSQL user | - | **Yes** | `xui_user` |
+| `XUI_DB_PASSWORD` | PostgreSQL password | - | **Yes** | `change_this_password` |
+| `XUI_DB_NAME` | Database name | App name | No | `xui_db` |
+| `XUI_DB_SSLMODE` | SSL mode | `disable` | No | `disable`, `require`, `verify-ca`, `verify-full` |
+
+**Logging and Debugging:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `XUI_LOG_LEVEL` | Logging level | `info` | `debug`, `info`, `notice`, `warning`, `error` |
+| `XUI_DEBUG` | Debug mode | `false` | `true`, `false` |
+| `XUI_LOG_FOLDER` | Log folder | Platform dependent | `/var/log/xui` |
+
+**Xray Settings:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `XRAY_VMESS_AEAD_FORCED` | Force VMESS AEAD | `false` | `true`, `false` |
+
+**Security:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `XUI_ENABLE_FAIL2BAN` | Enable fail2ban | `true` | `true`, `false` |
+
+**Node Service TLS Settings:**
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `NODE_TLS_CERT_FILE` | SSL certificate path for node API | - | `/app/cert/node-cert.pem` |
+| `NODE_TLS_KEY_FILE` | SSL private key path for node API | - | `/app/cert/node-key.pem` |
+
+**Example docker-compose.yml configuration:**
+
+```yaml
+services:
+  3xui:
+    environment:
+      # Xray settings
+      XRAY_VMESS_AEAD_FORCED: "false"
+      XUI_ENABLE_FAIL2BAN: "true"
+      
+      # Web Panel settings (only via env, not available in UI)
+      XUI_WEB_PORT: 2053
+      XUI_WEB_LISTEN: 0.0.0.0
+      XUI_WEB_DOMAIN: panel.example.com
+      XUI_WEB_BASE_PATH: /
+      XUI_WEB_CERT_FILE: /app/cert/fullchain.pem
+      XUI_WEB_KEY_FILE: /app/cert/privkey.pem
+      
+      # Subscription settings (only via env, not available in UI)
+      XUI_SUB_PORT: 2096
+      XUI_SUB_PATH: /sub/
+      XUI_SUB_DOMAIN: sub.example.com
+      XUI_SUB_CERT_FILE: /app/cert/sub-fullchain.pem
+      XUI_SUB_KEY_FILE: /app/cert/sub-privkey.pem
+      
+      # PostgreSQL settings
+      XUI_DB_HOST: postgres
+      XUI_DB_PORT: 5432
+      XUI_DB_USER: xui_user
+      XUI_DB_PASSWORD: change_this_password
+      XUI_DB_NAME: xui_db
+      XUI_DB_SSLMODE: disable
+```
+
+**Important Notes:**
+- Web Panel and Subscription settings (`XUI_WEB_*` and `XUI_SUB_*`) are **only available through environment variables** and cannot be changed via the web interface
+- Database credentials (`XUI_DB_USER`, `XUI_DB_PASSWORD`) are **required** for the application to work
+- All certificate paths must be absolute paths inside the container (usually `/app/cert/*.pem`)
+- Database is stored on the host via bind mount: `$PWD/postgres_data:/var/lib/postgresql/data`
+
 #### SSL Certificates and TLS Configuration
 
 **Certificate Setup:**
@@ -475,7 +581,7 @@ docker-compose down -v
 
 ### API Documentation
 
-For integrating with 3X-UI panel programmatically, see the complete API reference:
+For integrating with SharX panel programmatically, see the complete API reference:
 
 - **[API Documentation](docs/API.md)** - REST API endpoints, authentication, examples
 

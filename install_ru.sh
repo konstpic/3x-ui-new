@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-# 3X-UI NEW Installation Script
+# 3X-UI NEW Скрипт установки (Русская версия)
 # Author: @konspic
 # Version: 3.0.0b
 # ============================================
@@ -42,23 +42,23 @@ print_banner() {
     echo "║     ███████║██║  ██║██║  ██║██║  ██║██╔╝ ██╗                  ║"
     echo "║     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝                  ║"
     echo "║                                                               ║"
-    echo "║              Next Generation Panel Management                 ║"
+    echo "║         Управление панелью нового поколения                   ║"
     echo "║                                                               ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
 
 # Print colored message
-print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+print_info() { echo -e "${BLUE}[ИНФО]${NC} $1"; }
+print_success() { echo -e "${GREEN}[УСПЕХ]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[ПРЕДУПРЕЖДЕНИЕ]${NC} $1"; }
+print_error() { echo -e "${RED}[ОШИБКА]${NC} $1"; }
 
 # Check if running as root
 check_root() {
     if [[ $EUID -ne 0 ]]; then
-        print_error "This script must be run as root!"
-        echo -e "Please run: ${YELLOW}sudo bash install.sh${NC}"
+        print_error "Этот скрипт должен быть запущен от имени root!"
+        echo -e "Пожалуйста, запустите: ${YELLOW}sudo bash install_ru.sh${NC}"
         exit 1
     fi
 }
@@ -72,7 +72,7 @@ detect_os() {
         . /etc/os-release
         OS=$ID
     elif [[ -f /etc/redhat-release ]]; then
-        OS="centos"
+        OS="cenвs"
     elif [[ -f /etc/arch-release ]]; then
         OS="arch"
     elif [[ -f /etc/alpine-release ]]; then
@@ -94,31 +94,31 @@ detect_os() {
         PACKAGE_MANAGER="zypper"
     fi
     
-    echo -e "  OS: ${CYAN}$OS${NC}"
-    echo -e "  Package Manager: ${CYAN}$PACKAGE_MANAGER${NC}"
+    echo -e "  ОС: ${CYAN}$OS${NC}"
+    echo -e "  Менеджер пакетов: ${CYAN}$PACKAGE_MANAGER${NC}"
 }
 
 # Check system requirements
 check_system() {
-    print_info "Checking system requirements..."
+    print_info "Проверка системных требований..."
     
     # Detect OS
     detect_os
     
     if [[ -z "$PACKAGE_MANAGER" ]]; then
-        print_error "Could not detect package manager!"
+        print_error "Не удалось определить менеджер пакетов!"
         exit 1
     fi
     
     # Check architecture
     ARCH=$(uname -m)
     if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" && "$ARCH" != "armv7l" ]]; then
-        print_error "Unsupported architecture: $ARCH"
+        print_error "Неподдерживаемая архитектура: $ARCH"
         exit 1
     fi
-    echo -e "  Architecture: ${CYAN}$ARCH${NC}"
+    echo -e "  Архитектура: ${CYAN}$ARCH${NC}"
     
-    print_success "System check passed!"
+    print_success "Проверка системы пройдена!"
 }
 
 # Install Docker - Debian/Ubuntu
@@ -135,7 +135,7 @@ install_docker_apt() {
     curl -fsSL https://download.docker.com/linux/$OS/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
     chmod a+r /etc/apt/keyrings/docker.gpg
     
-    # Set up repository
+    # Set up reposiвry
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$OS \
       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
@@ -154,7 +154,7 @@ install_docker_dnf() {
     # Install prerequisites
     dnf install -y dnf-plugins-core
     
-    # Add Docker repository
+    # Add Docker reposiвry
     dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
     
     # Install Docker
@@ -169,8 +169,8 @@ install_docker_yum() {
     # Install prerequisites
     yum install -y yum-utils
     
-    # Add Docker repository
-    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    # Add Docker reposiвry
+    yum-config-manager --add-repo https://download.docker.com/linux/cenвs/docker-ce.repo
     
     # Install Docker
     yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -187,7 +187,7 @@ install_docker_pacman() {
 
 # Install Docker - Alpine
 install_docker_apk() {
-    # Update repositories
+    # Update reposiвries
     apk update
     
     # Install Docker
@@ -206,11 +206,11 @@ install_docker_zypper() {
 # Install Docker if not present
 install_docker() {
     if command -v docker &> /dev/null; then
-        print_success "Docker is already installed: $(docker --version)"
+        print_success "Docker уже установлен: $(docker --version)"
         return 0
     fi
 
-    print_info "Installing Docker for $OS using $PACKAGE_MANAGER..."
+    print_info "Установка Docker для $OS используя $PACKAGE_MANAGER..."
     
     case $PACKAGE_MANAGER in
         apt)
@@ -232,8 +232,8 @@ install_docker() {
             install_docker_zypper
             ;;
         *)
-            print_error "Unsupported package manager: $PACKAGE_MANAGER"
-            print_info "Please install Docker manually: https://docs.docker.com/engine/install/"
+            print_error "Неподдерживаемый менеджер пакетов: $PACKAGE_MANAGER"
+            print_info "Пожалуйста, установите Docker toручную: https://docs.docker.com/engine/install/"
             exit 1
             ;;
     esac
@@ -250,9 +250,9 @@ install_docker() {
     
     # Verify installation
     if command -v docker &> /dev/null; then
-        print_success "Docker installed successfully!"
+        print_success "Docker успешно установлен!"
     else
-        print_error "Docker installation failed!"
+        print_error "Ошибка установки Docker!"
         exit 1
     fi
 }
@@ -261,13 +261,13 @@ install_docker() {
 install_docker_compose() {
     # Check for docker compose plugin
     if docker compose version &> /dev/null; then
-        print_success "Docker Compose plugin is available: $(docker compose version)"
+        print_success "Плагин Docker Compose доступен: $(docker compose version)"
         return 0
     fi
     
     # Check for standalone docker-compose
     if command -v docker-compose &> /dev/null; then
-        print_success "Docker Compose standalone is available: $(docker-compose --version)"
+        print_success "Docker Compose standalone доступен: $(docker-compose --version)"
         # Create alias function for compatibility
         docker() {
             if [[ "$1" == "compose" ]]; then
@@ -280,7 +280,7 @@ install_docker_compose() {
         return 0
     fi
     
-    print_info "Installing Docker Compose..."
+    print_info "Установка Docker Compose..."
     
     case $PACKAGE_MANAGER in
         apt)
@@ -306,7 +306,7 @@ install_docker_compose() {
             ;;
         *)
             # Try to install standalone docker-compose
-            print_info "Installing Docker Compose standalone..."
+            print_info "Установка Docker Compose standalone..."
             COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
             curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
@@ -317,8 +317,8 @@ install_docker_compose() {
     if docker compose version &> /dev/null || docker-compose --version &> /dev/null; then
         print_success "Docker Compose installed successfully!"
     else
-        print_error "Docker Compose installation failed!"
-        print_info "Please install manually: https://docs.docker.com/compose/install/"
+        print_error "Ошибка установки Docker Compose!"
+        print_info "Пожалуйста, установите toручную: https://docs.docker.com/compose/install/"
         exit 1
     fi
 }
@@ -434,14 +434,14 @@ validate_port() {
     
     # Check if port is a valid number
     if ! [[ "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-        print_error "Invalid port number: $port (must be 1-65535)"
+        print_error "Неверный номер порта: $port (должен быть 1-65535)"
         return 1
     fi
     
     # Check if port is in use
     if is_port_in_use "$port"; then
-        print_error "Port $port is already in use!"
-        print_info "Please choose a different port or free this port first."
+        print_error "Порт $port уже используется!"
+        print_info "Пожалуйста, toыберите другой порт или освободите этот порт."
         return 1
     fi
     
@@ -455,7 +455,7 @@ prompt_port() {
     local port
     
     while true; do
-        read -p "Enter $service_name port [$default_port]: " port
+        read -p "Введите порт для $service_name [$default_port]: " port
         port=${port:-$default_port}
         
         if validate_port "$port" "$service_name"; then
@@ -472,7 +472,7 @@ prompt_port() {
 
 # Install acme.sh for SSL certificate management
 install_acme() {
-    print_info "Installing acme.sh for SSL certificate management..."
+    print_info "Установка acme.sh для управления SSL сертификатами..."
     cd ~ || return 1
     
     # Install dependencies based on package manager
@@ -500,10 +500,10 @@ install_acme() {
     
     curl -s https://get.acme.sh | sh >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        print_error "Failed to install acme.sh"
+        print_error "Ошибка установки acme.sh"
         return 1
     else
-        print_success "acme.sh installed successfully"
+        print_success "acme.sh успешно установлен"
     fi
     
     # Enable cron for auto-renewal
@@ -523,13 +523,13 @@ setup_ssl_certificate() {
     local domain="$1"
     local cert_dir="$2"
     
-    print_info "Setting up SSL certificate for domain: $domain"
+    print_info "Настройка SSL сертификата для домена: $domain"
     
     # Check if acme.sh is installed
     if ! command -v ~/.acme.sh/acme.sh &>/dev/null; then
         install_acme
         if [ $? -ne 0 ]; then
-            print_warning "Failed to install acme.sh, skipping SSL setup"
+            print_warning "Ошибка установки acme.sh, skipping SSL setup"
             return 1
         fi
     fi
@@ -540,19 +540,19 @@ setup_ssl_certificate() {
     mkdir -p "$cert_dir"
     
     # Stop containers to free port 80
-    print_info "Stopping containers temporarily to free port 80..."
+    print_info "Временная остановка контейнероto для освобождения порта 80..."
     cd "$INSTALL_DIR" 2>/dev/null && docker compose down 2>/dev/null || true
     
     # Issue certificate
-    print_info "Issuing SSL certificate for ${domain}..."
-    print_warning "Note: Port 80 must be open and accessible from the internet"
+    print_info "Выпуск SSL сертификата для ${domain}..."
+    print_warning "Примечание: Порт 80 должен быть открыт и доступен из интернета"
     
     ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt >/dev/null 2>&1
     ~/.acme.sh/acme.sh --issue -d ${domain} --listen-v6 --standalone --httpport 80 --force
     
     if [ $? -ne 0 ]; then
-        print_error "Failed to issue certificate for ${domain}"
-        print_warning "Please ensure port 80 is open and domain points to this server"
+        print_error "Ошибка toыпуска сертификата для ${domain}"
+        print_warning "Пожалуйста, убедитесь, что порт 80 открыт и домен указывает на этот сервер"
         rm -rf ~/.acme.sh/${domain} 2>/dev/null
         rm -rf "$acmeCertPath" 2>/dev/null
         return 1
@@ -565,7 +565,7 @@ setup_ssl_certificate() {
         --reloadcmd "cp ${acmeCertPath}/privkey.pem ${cert_dir}/ && cp ${acmeCertPath}/fullchain.pem ${cert_dir}/ && cd ${INSTALL_DIR} && docker compose restart 3xui 2>/dev/null || true" >/dev/null 2>&1
     
     if [ $? -ne 0 ]; then
-        print_warning "Certificate install command had issues, checking files..."
+        print_warning "Сертификат tostall command had issues, checking files..."
     fi
     
     # Copy certificates to our cert directory
@@ -574,16 +574,16 @@ setup_ssl_certificate() {
         cp "${acmeCertPath}/privkey.pem" "${cert_dir}/"
         chmod 600 "${cert_dir}/privkey.pem"
         chmod 644 "${cert_dir}/fullchain.pem"
-        print_success "SSL certificate installed successfully!"
+        print_success "SSL сертификат успешно установлен!"
     else
-        print_error "Certificate files not found"
+        print_error "Файлы сертификата не найдены"
         return 1
     fi
     
     # Enable auto-renew
     ~/.acme.sh/acme.sh --upgrade --auto-upgrade >/dev/null 2>&1
     
-    print_success "Certificate valid for 90 days with auto-renewal enabled"
+    print_success "Сертификат действителен 90 дней с автоматическим обновлением"
     return 0
 }
 
@@ -593,30 +593,30 @@ setup_ip_certificate() {
     local ipv6="${2:-}"
     local cert_dir="$3"
 
-    print_info "Setting up Let's Encrypt IP certificate (shortlived profile)..."
-    print_warning "Note: IP certificates are valid for ~6 days and will auto-renew."
+    print_info "Настройка Let's Encrypt IP сертификата (краткосрочный профиль)..."
+    print_warning "Примечание: IP сертификаты действительны ~6 дней и будут автоматически обновляться."
 
     # Check for acme.sh
     if ! command -v ~/.acme.sh/acme.sh &>/dev/null; then
         install_acme
         if [ $? -ne 0 ]; then
-            print_error "Failed to install acme.sh"
+            print_error "Ошибка установки acme.sh"
             return 1
         fi
     fi
 
     # Validate IP address
     if [[ -z "$ipv4" ]]; then
-        print_error "IPv4 address is required"
+        print_error "Требуется IPv4 адрес"
         return 1
     fi
 
     if ! is_ipv4 "$ipv4"; then
-        print_error "Invalid IPv4 address: $ipv4"
+        print_error "Неверный IPv4 адрес: $ipv4"
         return 1
     fi
 
-    # Create certificate directories
+    # Create certificate direcвries
     local acmeCertDir="/root/cert/ip"
     mkdir -p "$acmeCertDir"
     mkdir -p "$cert_dir"
@@ -625,11 +625,11 @@ setup_ip_certificate() {
     local domain_args="-d ${ipv4}"
     if [[ -n "$ipv6" ]] && is_ipv6 "$ipv6"; then
         domain_args="${domain_args} -d ${ipv6}"
-        print_info "Including IPv6 address: ${ipv6}"
+        print_info "Включение IPv6 адреса: ${ipv6}"
     fi
 
     # Stop containers to free port 80
-    print_info "Stopping containers temporarily to free port 80..."
+    print_info "Временная остановка контейнероto для освобождения порта 80..."
     cd "$INSTALL_DIR" 2>/dev/null && docker compose down 2>/dev/null || true
 
     # Choose port for HTTP-01 listener
@@ -637,13 +637,13 @@ setup_ip_certificate() {
     
     # Ensure port 80 is available
     if is_port_in_use 80; then
-        print_warning "Port 80 is in use, attempting to find process..."
+        print_warning "Порт 80 используется, попытка найти процесс..."
         fuser -k 80/tcp 2>/dev/null || true
         sleep 2
     fi
 
     # Issue certificate with shortlived profile
-    print_info "Issuing IP certificate for ${ipv4}..."
+    print_info "Выпуск IP сертификата для ${ipv4}..."
     ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt >/dev/null 2>&1
     
     ~/.acme.sh/acme.sh --issue \
@@ -656,15 +656,15 @@ setup_ip_certificate() {
         --force
 
     if [ $? -ne 0 ]; then
-        print_error "Failed to issue IP certificate"
-        print_warning "Please ensure port 80 is reachable from the internet"
+        print_error "Ошибка toыпуска IP сертификата"
+        print_warning "Пожалуйста, убедитесь, что порт 80 доступен из интернета"
         rm -rf ~/.acme.sh/${ipv4} 2>/dev/null
         [[ -n "$ipv6" ]] && rm -rf ~/.acme.sh/${ipv6} 2>/dev/null
         rm -rf ${acmeCertDir} 2>/dev/null
         return 1
     fi
 
-    print_success "Certificate issued successfully, installing..."
+    print_success "Сертификат успешно toыпущен, установка..."
 
     # Install certificate
     ~/.acme.sh/acme.sh --installcert -d ${ipv4} \
@@ -674,7 +674,7 @@ setup_ip_certificate() {
 
     # Verify certificate files exist
     if [[ ! -f "${acmeCertDir}/fullchain.pem" || ! -f "${acmeCertDir}/privkey.pem" ]]; then
-        print_error "Certificate files not found after installation"
+        print_error "Файлы сертификата не найдены after installation"
         rm -rf ~/.acme.sh/${ipv4} 2>/dev/null
         [[ -n "$ipv6" ]] && rm -rf ~/.acme.sh/${ipv6} 2>/dev/null
         rm -rf ${acmeCertDir} 2>/dev/null
@@ -687,13 +687,13 @@ setup_ip_certificate() {
     chmod 600 "${cert_dir}/privkey.pem"
     chmod 644 "${cert_dir}/fullchain.pem"
     
-    print_success "Certificate files installed successfully"
+    print_success "Файлы сертификата успешно установлены"
 
     # Enable auto-upgrade for acme.sh
     ~/.acme.sh/acme.sh --upgrade --auto-upgrade >/dev/null 2>&1
 
-    print_success "IP certificate installed and configured successfully!"
-    print_info "Certificate valid for ~6 days, auto-renews via acme.sh cron job."
+    print_success "IP сертификат успешно установлен и настроен!"
+    print_info "Сертификат действителен ~6 дней, автоматически обновляется через cron задачу acme.sh."
     return 0
 }
 
@@ -741,12 +741,12 @@ copy_letsencrypt_certificate() {
     local target_dir="$2"
     
     if [[ ! -d "$source_dir" ]]; then
-        print_error "Certificate directory not found: $source_dir"
+        print_error "Директория сертификата не найдена: $source_dir"
         return 1
     fi
     
     if [[ ! -f "${source_dir}/fullchain.pem" ]] || [[ ! -f "${source_dir}/privkey.pem" ]]; then
-        print_error "Certificate files not found in $source_dir"
+        print_error "Файлы сертификата не найдены in $source_dir"
         return 1
     fi
     
@@ -757,7 +757,7 @@ copy_letsencrypt_certificate() {
             local expiry_epoch=$(date -d "$expiry" +%s 2>/dev/null || date -j -f "%b %d %H:%M:%S %Y %Z" "$expiry" +%s 2>/dev/null)
             local now_epoch=$(date +%s)
             if [[ -n "$expiry_epoch" && "$expiry_epoch" -le "$now_epoch" ]]; then
-                print_warning "Certificate in $source_dir has expired (expired: $expiry)"
+                print_warning "Сертификат to $source_dir истек (истек: $expiry)"
                 return 1
             fi
         fi
@@ -770,7 +770,7 @@ copy_letsencrypt_certificate() {
     chmod 600 "${target_dir}/privkey.pem" 2>/dev/null
     chmod 644 "${target_dir}/fullchain.pem" 2>/dev/null
     
-    print_success "Certificates copied from $source_dir to $target_dir"
+    print_success "Сертификаты скопированы из $source_dir to $target_dir"
     return 0
 }
 
@@ -781,18 +781,18 @@ prompt_and_setup_ssl() {
     
     # First check for existing certificates
     echo ""
-    print_info "Checking for existing certificates..."
+    print_info "Поиск существующих сертификатов..."
     
     # Check if we already have valid certificates in cert_dir
     if [[ -f "${cert_dir}/fullchain.pem" && -f "${cert_dir}/privkey.pem" ]]; then
         if check_existing_certificates "$server_ip" "$cert_dir" 2>/dev/null; then
             echo ""
-            echo -e "${GREEN}Valid certificate already exists in ${cert_dir}${NC}"
-            read -p "Use existing certificate? [Y/n]: " use_existing
+            echo -e "${GREEN}Действительный сертификат уже существует to ${cert_dir}${NC}"
+            read -p "Использовать существующий сертификат? [Y/n]: " use_existing
             if [[ "$use_existing" != "n" && "$use_existing" != "N" ]]; then
                 SSL_HOST="${server_ip}"
                 CERT_TYPE="letsencrypt-ip"
-                print_success "Using existing certificate"
+                print_success "Использование существующего сертификата"
                 # Update SSL settings in database if panel is running (ignore errors)
                 update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
                 return 0
@@ -808,24 +808,24 @@ prompt_and_setup_ssl() {
     
     if [[ ${#letsencrypt_certs[@]} -gt 0 ]]; then
         echo ""
-        echo -e "${GREEN}Found Let's Encrypt certificates in standard locations:${NC}"
+        echo -e "${GREEN}Найдены Let's Encrypt сертификаты to стандартных местах:${NC}"
         local cert_index=1
         for cert_path in "${letsencrypt_certs[@]}"; do
             local cert_domain=$(basename "$cert_path")
-            echo -e "  ${CYAN}${cert_index}.${NC} ${cert_path} (domain: ${GREEN}${cert_domain}${NC})"
+            echo -e "  ${CYAN}${cert_index}.${NC} ${cert_path} (домен: ${GREEN}${cert_domain}${NC})"
             ((cert_index++))
         done
         echo ""
-        read -p "Use one of these certificates? [y/N]: " use_letsencrypt
+        read -p "Использовать один из этих сертификатов? [y/N]: " use_letsencrypt
         if [[ "$use_letsencrypt" == "y" || "$use_letsencrypt" == "Y" ]]; then
             if [[ ${#letsencrypt_certs[@]} -eq 1 ]]; then
                 local selected_cert="${letsencrypt_certs[0]}"
             else
-                read -p "Enter certificate number [1-${#letsencrypt_certs[@]}]: " cert_num
+                read -p "Введите номер сертификата [1-${#letsencrypt_certs[@]}]: " cert_num
                 if [[ "$cert_num" =~ ^[0-9]+$ ]] && [[ "$cert_num" -ge 1 ]] && [[ "$cert_num" -le ${#letsencrypt_certs[@]} ]]; then
                     local selected_cert="${letsencrypt_certs[$((cert_num-1))]}"
                 else
-                    print_error "Invalid selection"
+                    print_error "Неверный toыбор"
                     return 1
                 fi
             fi
@@ -839,7 +839,7 @@ prompt_and_setup_ssl() {
                 else
                     CERT_TYPE="letsencrypt-domain"
                 fi
-                print_success "Using Let's Encrypt certificate from $selected_cert"
+                print_success "Использование Let's Encrypt сертификата из $selected_cert"
                 update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
                 return 0
             fi
@@ -850,12 +850,12 @@ prompt_and_setup_ssl() {
     if [[ -d "/root/.acme.sh/${server_ip}_ecc" ]] || [[ -d "/root/.acme.sh/${server_ip}" ]]; then
         if check_existing_certificates "$server_ip" "$cert_dir"; then
             echo ""
-            echo -e "${GREEN}Found existing Let's Encrypt certificate for ${server_ip}${NC}"
-            read -p "Use existing certificate? [Y/n]: " use_existing
+            echo -e "${GREEN}Найден существующий Let's Encrypt сертификат для ${server_ip}${NC}"
+            read -p "Использовать существующий сертификат? [Y/n]: " use_existing
             if [[ "$use_existing" != "n" && "$use_existing" != "N" ]]; then
                 SSL_HOST="${server_ip}"
                 CERT_TYPE="letsencrypt-ip"
-                print_success "Using existing certificate"
+                print_success "Использование существующего сертификата"
                 # Update SSL settings in database if panel is running (ignore errors)
                 update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
                 return 0
@@ -864,11 +864,11 @@ prompt_and_setup_ssl() {
     fi
 
     echo ""
-    echo -e "${CYAN}Choose SSL certificate setup method:${NC}"
+    echo -e "${CYAN}Выберите метод настройки SSL сертификата:${NC}"
     echo -e "${GREEN}1.${NC} Let's Encrypt for Domain (90-day validity, auto-renews)"
     echo -e "${GREEN}2.${NC} Let's Encrypt for IP Address (6-day validity, auto-renews)"
-    echo -e "${GREEN}3.${NC} Skip SSL setup (configure later)"
-    echo -e "${BLUE}Note:${NC} Both options require port 80 open for HTTP-01 challenge."
+    echo -e "${GREEN}3.${NC} Пропустить настройку SSL (настроить позже)"
+    echo -e "${BLUE}Примечание:${NC} Оба toарианта требуют открытый порт 80 для HTTP-01 проверки."
     echo ""
     read -rp "Choose an option [1-3, default: 2]: " ssl_choice
     ssl_choice="${ssl_choice:-2}"
@@ -876,20 +876,20 @@ prompt_and_setup_ssl() {
     case "$ssl_choice" in
     1)
         # Let's Encrypt domain certificate
-        print_info "Using Let's Encrypt for domain certificate..."
+        print_info "Использование Let's Encrypt для сертификата домена..."
         
         local domain=""
         while true; do
-            read -rp "Please enter your domain name: " domain
+            read -rp "Пожалуйста, toведите имя toашего домена: " domain
             domain="${domain// /}"
             
             if [[ -z "$domain" ]]; then
-                print_error "Domain name cannot be empty. Please try again."
+                print_error "Имя домена не может быть пустым. Пожалуйста, попробуйте снова."
                 continue
             fi
             
             if ! is_domain "$domain"; then
-                print_error "Invalid domain format: ${domain}. Please enter a valid domain name."
+                print_error "Неверный формат домена: ${domain}. Пожалуйста, toведите действительное имя домена."
                 continue
             fi
             
@@ -908,7 +908,7 @@ prompt_and_setup_ssl() {
             local cert_index=1
             for cert_path in "${letsencrypt_certs[@]}"; do
                 local cert_domain=$(basename "$cert_path")
-                echo -e "  ${CYAN}${cert_index}.${NC} ${cert_path} (domain: ${GREEN}${cert_domain}${NC})"
+                echo -e "  ${CYAN}${cert_index}.${NC} ${cert_path} (домен: ${GREEN}${cert_domain}${NC})"
                 ((cert_index++))
             done
             echo ""
@@ -917,11 +917,11 @@ prompt_and_setup_ssl() {
                 if [[ ${#letsencrypt_certs[@]} -eq 1 ]]; then
                     local selected_cert="${letsencrypt_certs[0]}"
                 else
-                    read -p "Enter certificate number [1-${#letsencrypt_certs[@]}]: " cert_num
+                    read -p "Введите номер сертификата [1-${#letsencrypt_certs[@]}]: " cert_num
                     if [[ "$cert_num" =~ ^[0-9]+$ ]] && [[ "$cert_num" -ge 1 ]] && [[ "$cert_num" -le ${#letsencrypt_certs[@]} ]]; then
                         local selected_cert="${letsencrypt_certs[$((cert_num-1))]}"
                     else
-                        print_error "Invalid selection"
+                        print_error "Неверный toыбор"
                         continue
                     fi
                 fi
@@ -929,7 +929,7 @@ prompt_and_setup_ssl() {
                 if copy_letsencrypt_certificate "$selected_cert" "$cert_dir"; then
                     SSL_HOST="${domain}"
                     CERT_TYPE="letsencrypt-domain"
-                    print_success "Using Let's Encrypt certificate from $selected_cert"
+                    print_success "Использование Let's Encrypt сертификата из $selected_cert"
                     update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
                     return 0
                 else
@@ -941,12 +941,12 @@ prompt_and_setup_ssl() {
         # Check for existing domain certificate (acme.sh or local)
         if check_existing_certificates "$domain" "$cert_dir"; then
             echo ""
-            echo -e "${GREEN}Found existing certificate for ${domain}${NC}"
-            read -p "Use existing certificate? [Y/n]: " use_existing
+            echo -e "${GREEN}Найден существующий сертификат для ${domain}${NC}"
+            read -p "Использовать существующий сертификат? [Y/n]: " use_existing
             if [[ "$use_existing" != "n" && "$use_existing" != "N" ]]; then
                 SSL_HOST="${domain}"
                 CERT_TYPE="letsencrypt-domain"
-                print_success "Using existing certificate for ${domain}"
+                print_success "Использование существующего сертификата for ${domain}"
                 # Update SSL settings in database (ignore errors if DB not running)
                 update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
                 return 0
@@ -957,25 +957,25 @@ prompt_and_setup_ssl() {
         if [ $? -eq 0 ]; then
             SSL_HOST="${domain}"
             CERT_TYPE="letsencrypt-domain"
-            print_success "SSL certificate configured successfully with domain: ${domain}"
+            print_success "SSL certificate configured successfully with домен: ${domain}"
             # Update SSL settings in database (ignore errors if DB not running)
             update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
         else
-            print_warning "SSL setup failed. You can configure it later from the menu."
+            print_warning "Ошибка настройки SSL. Вы можете настроить его позже из меню."
             SSL_HOST="${server_ip}"
             CERT_TYPE="none"
         fi
         ;;
     2)
         # Let's Encrypt IP certificate
-        print_info "Using Let's Encrypt for IP certificate (shortlived profile)..."
+        print_info "Использование Let's Encrypt для IP сертификата (краткосрочный профиль)..."
         
         # Ask for optional IPv6
         local ipv6_addr=""
         local detected_ipv6=$(get_server_ipv6)
         if [[ -n "$detected_ipv6" ]]; then
-            echo -e "Detected IPv6: ${GREEN}$detected_ipv6${NC}"
-            read -rp "Include this IPv6 address? [Y/n]: " include_ipv6
+            echo -e "Обнаружен IPv6: ${GREEN}$detected_ipv6${NC}"
+            read -rp "Включить этот IPv6 адрес? [Y/n]: " include_ipv6
             if [[ "$include_ipv6" != "n" && "$include_ipv6" != "N" ]]; then
                 ipv6_addr="$detected_ipv6"
             fi
@@ -988,11 +988,11 @@ prompt_and_setup_ssl() {
         if [ $? -eq 0 ]; then
             SSL_HOST="${server_ip}"
             CERT_TYPE="letsencrypt-ip"
-            print_success "Let's Encrypt IP certificate configured successfully"
+            print_success "Let's Encrypt IP сертификат успешно настроен"
             # Update SSL settings in database (ignore errors if DB not running)
             update_ssl_settings_in_db "/app/cert/fullchain.pem" "/app/cert/privkey.pem" || true
         else
-            print_warning "IP certificate setup failed. You can configure it later from the menu."
+            print_warning "Ошибка настройки IP сертификата. Вы можете настроить его позже из меню."
             SSL_HOST="${server_ip}"
             CERT_TYPE="none"
         fi
@@ -1003,7 +1003,7 @@ prompt_and_setup_ssl() {
         CERT_TYPE="none"
         ;;
     *)
-        print_warning "Invalid option. Skipping SSL setup."
+        print_warning "Неверная опция. Пропуск настройки SSL."
         SSL_HOST="${server_ip}"
         CERT_TYPE="none"
         ;;
@@ -1219,7 +1219,7 @@ services:
       XUI_ENABLE_FAIL2BAN: "true"
       # XUI_LOG_LEVEL: "debug"
       
-      # Web Panel настройки (только через env, не доступны в UI)
+      # Web Panel настройки (только через env, не доступны to UI)
 $(echo -e "$env_vars")
       
       # PostgreSQL settings
@@ -1292,7 +1292,7 @@ $(echo -e "$ports_section")
       XUI_ENABLE_FAIL2BAN: "true"
       # XUI_LOG_LEVEL: "debug"
       
-      # Web Panel настройки (только через env, не доступны в UI)
+      # Web Panel настройки (только через env, не доступны to UI)
       # XUI_WEB_PORT: 2053
       # XUI_WEB_LISTEN: 0.0.0.0
       # XUI_WEB_DOMAIN: panel.example.com
@@ -1300,7 +1300,7 @@ $(echo -e "$ports_section")
       # XUI_WEB_CERT_FILE: /app/cert/fullchain.pem
       # XUI_WEB_KEY_FILE: /app/cert/privkey.pem
       
-      # Subscription настройки (только через env, не доступны в UI)
+      # Subscription настройки (только через env, не доступны to UI)
       # XUI_SUB_PORT: 2096
       # XUI_SUB_PATH: /sub/
       # XUI_SUB_DOMAIN: sub.example.com
@@ -1489,53 +1489,53 @@ update_node() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ ⚠️                   ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${RED}Before updating the node, we STRONGLY RECOMMEND creating a backup!${NC}"
+    echo -e "${RED}Перед обновлением узла мы НАСТОЯТЕЛЬНО РЕКОМЕНДУЕМ создать резервную копию!${NC}"
     echo ""
-    echo -e "${CYAN}If you have a panel with database, backup the panel database first:${NC}"
+    echo -e "${CYAN}Если у вас есть панель с базой данных, сначала создайте резервную копию базы данных панели:${NC}"
     echo -e "  ${YELLOW}docker exec -t \$(docker ps -qf name=postgres) pg_dump -U xui_user xui_db > backup_\$(date +%Y%m%d_%H%M%S).sql${NC}"
     echo ""
-    echo -e "${CYAN}Or use the panel's built-in backup feature in Settings → Backup.${NC}"
+    echo -e "${CYAN}Или используйте встроенную функцию резервного копирования в панели: Настройки → Резервное копирование.${NC}"
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
     while true; do
-        echo -e -n "${CYAN}Have you created a backup? (yes/no): ${NC}"
+        echo -e -n "${CYAN}Вы создали резервную копию? (да/нет): ${NC}"
         read -r backup_confirm
         case "$backup_confirm" in
-            [Yy][Ee][Ss]|[Yy])
+            [Дд][Аа]|[Дд]|[Yy][Ee][Ss]|[Yy])
                 break
                 ;;
-            [Nn][Oo]|[Nn])
+            [Нн][Ее][Тт]|[Нн]|[Nn][Oo]|[Nn])
                 echo ""
-                echo -e "${YELLOW}Do you want to continue without backup? (yes/no): ${NC}"
+                echo -e "${YELLOW}Вы хотите продолжить без резервной копии? (да/нет): ${NC}"
                 read -r continue_confirm
                 case "$continue_confirm" in
-                    [Yy][Ee][Ss]|[Yy])
-                        echo -e "${YELLOW}Continuing update without backup...${NC}"
+                    [Дд][Аа]|[Дд]|[Yy][Ee][Ss]|[Yy])
+                        echo -e "${YELLOW}Продолжаем обновление без резервной копии...${NC}"
                         echo ""
                         break
                         ;;
-                    [Nn][Oo]|[Nn]|*)
-                        echo -e "${GREEN}Update cancelled. Please create a backup first.${NC}"
+                    [Нн][Ее][Тт]|[Нн]|[Nn][Oo]|[Nn]|*)
+                        echo -e "${GREEN}Обновление отменено. Пожалуйста, сначала создайте резервную копию.${NC}"
                         return 1
                         ;;
                 esac
                 ;;
             *)
-                echo -e "${RED}Please answer 'yes' or 'no'.${NC}"
+                echo -e "${RED}Пожалуйста, ответьте 'да' или 'нет'.${NC}"
                 ;;
         esac
     done
     
     echo ""
-    print_info "Updating Node..."
+    print_info "Обновление узла..."
     cd "$NODE_DIR"
     
-    print_info "Step 1/3: Pulling new node image..."
+    print_info "Шаг 1/3: Загрузка нового образа узла..."
     docker compose pull node
     
     print_info "Step 2/3: Stopping and removing old container..."
@@ -1554,7 +1554,7 @@ update_node() {
 
 # Show node status
 show_node_status() {
-    print_info "Node Service Status:"
+    print_info "Node Статус сервисов:"
     echo ""
     cd "$NODE_DIR"
     docker compose ps
@@ -1704,7 +1704,7 @@ install_node_wizard() {
         "tag": "api",
         "listen": "127.0.0.1",
         "port": 62789,
-        "protocol": "tunnel",
+        "proвcol": "tunnel",
         "settings": {
           "address": "127.0.0.1"
         }
@@ -1713,7 +1713,7 @@ install_node_wizard() {
     "outbounds": [
       {
         "tag": "direct",
-        "protocol": "freedom",
+        "proвcol": "freedom",
         "settings": {
           "domainStrategy": "AsIs",
           "redirect": "",
@@ -1722,7 +1722,7 @@ install_node_wizard() {
       },
       {
         "tag": "blocked",
-        "protocol": "blackhole",
+        "proвcol": "blackhole",
         "settings": {}
       }
     ],
@@ -1760,8 +1760,8 @@ install_node_wizard() {
         {
           "type": "field",
           "outboundTag": "blocked",
-          "protocol": [
-            "bittorrent"
+          "proвcol": [
+            "bitвrrent"
           ]
         }
       ]
@@ -1785,7 +1785,7 @@ NODECONFIG
     
     # Check for existing panel certificates (if node is on same server as panel)
     if check_panel_certificates "$NODE_DIR/cert"; then
-        # Certificates copied from panel
+        # Сертификаты скопированы из panel
         CERT_TYPE="letsencrypt-ip"
         SSL_HOST="$server_ip"
         # Try to get cert type from panel config
@@ -1854,8 +1854,8 @@ NODECONFIG
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Management:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
+    echo -e "${WHITE}Управление:${NC}"
+    echo -e "  ${CYAN}bash install.sh${NC} - открыть меню управления"
     echo ""
 }
 
@@ -1896,7 +1896,7 @@ renew_node_certificate() {
         chmod 644 "${cert_dir}/fullchain.pem"
         print_success "Node certificate renewed successfully!"
     else
-        print_error "Certificate files not found"
+        print_error "Файлы сертификата не найдены"
     fi
     
     # Restart node
@@ -1954,7 +1954,7 @@ reset_node() {
         "tag": "api",
         "listen": "127.0.0.1",
         "port": 62789,
-        "protocol": "tunnel",
+        "proвcol": "tunnel",
         "settings": {
           "address": "127.0.0.1"
         }
@@ -1963,7 +1963,7 @@ reset_node() {
     "outbounds": [
       {
         "tag": "direct",
-        "protocol": "freedom",
+        "proвcol": "freedom",
         "settings": {
           "domainStrategy": "AsIs",
           "redirect": "",
@@ -1972,7 +1972,7 @@ reset_node() {
       },
       {
         "tag": "blocked",
-        "protocol": "blackhole",
+        "proвcol": "blackhole",
         "settings": {}
       }
     ],
@@ -2010,8 +2010,8 @@ reset_node() {
         {
           "type": "field",
           "outboundTag": "blocked",
-          "protocol": [
-            "bittorrent"
+          "proвcol": [
+            "bitвrrent"
           ]
         }
       ]
@@ -2103,13 +2103,13 @@ remove_node_port() {
     done
     echo ""
     
-    read -p "Enter port number to remove: " port_to_remove
+    read -p "Enter port number to remove: " port_в_remove
     
     # Find and remove port
     local new_ports=()
     local found=0
     for port in "${XRAY_PORTS[@]}"; do
-        if [[ "$port" != "$port_to_remove" ]]; then
+        if [[ "$port" != "$port_в_remove" ]]; then
             new_ports+=("$port")
         else
             found=1
@@ -2117,7 +2117,7 @@ remove_node_port() {
     done
     
     if [[ $found -eq 0 ]]; then
-        print_error "Port $port_to_remove not found!"
+        print_error "Port $port_в_remove not found!"
         return 1
     fi
     
@@ -2134,7 +2134,7 @@ remove_node_port() {
     docker compose down
     docker compose up -d
     
-    print_success "Port $port_to_remove removed and node restarted!"
+    print_success "Port $port_в_remove removed and node restarted!"
 }
 
 # ============================================
@@ -2212,55 +2212,55 @@ update_services() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ ⚠️                   ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${RED}Before updating, we STRONGLY RECOMMEND creating a database backup!${NC}"
+    echo -e "${RED}Перед обновлением мы НАСТОЯТЕЛЬНО РЕКОМЕНДУЕМ создать резервную копию базы данных!${NC}"
     echo ""
-    echo -e "${CYAN}Database location:${NC} ${WHITE}$INSTALL_DIR/postgres_data${NC}"
+    echo -e "${CYAN}Расположение базы данных:${NC} ${WHITE}$INSTALL_DIR/postgres_data${NC}"
     echo ""
-    echo -e "${CYAN}To create a backup, run:${NC}"
+    echo -e "${CYAN}Для создания резервной копии выполните:${NC}"
     echo -e "  ${YELLOW}docker exec -t \$(docker ps -qf name=postgres) pg_dump -U xui_user xui_db > backup_\$(date +%Y%m%d_%H%M%S).sql${NC}"
     echo ""
-    echo -e "${CYAN}Or use the panel's built-in backup feature in Settings → Backup.${NC}"
+    echo -e "${CYAN}Или используйте встроенную функцию резервного копирования в панели: Настройки → Резервное копирование.${NC}"
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
     while true; do
-        echo -e -n "${CYAN}Have you created a database backup? (yes/no): ${NC}"
+        echo -e -n "${CYAN}Вы создали резервную копию базы данных? (да/нет): ${NC}"
         read -r backup_confirm
         case "$backup_confirm" in
-            [Yy][Ee][Ss]|[Yy])
+            [Дд][Аа]|[Дд]|[Yy][Ee][Ss]|[Yy])
                 break
                 ;;
-            [Nn][Oo]|[Nn])
+            [Нн][Ее][Тт]|[Нн]|[Nn][Oo]|[Nn])
                 echo ""
-                echo -e "${YELLOW}Do you want to continue without backup? (yes/no): ${NC}"
+                echo -e "${YELLOW}Вы хотите продолжить без резервной копии? (да/нет): ${NC}"
                 read -r continue_confirm
                 case "$continue_confirm" in
-                    [Yy][Ee][Ss]|[Yy])
-                        echo -e "${YELLOW}Continuing update without backup...${NC}"
+                    [Дд][Аа]|[Дд]|[Yy][Ee][Ss]|[Yy])
+                        echo -e "${YELLOW}Продолжаем обновление без резервной копии...${NC}"
                         echo ""
                         break
                         ;;
-                    [Nn][Oo]|[Nn]|*)
-                        echo -e "${GREEN}Update cancelled. Please create a backup first.${NC}"
+                    [Нн][Ее][Тт]|[Нн]|[Nn][Oo]|[Nn]|*)
+                        echo -e "${GREEN}Обновление отменено. Пожалуйста, сначала создайте резервную копию.${NC}"
                         return 1
                         ;;
                 esac
                 ;;
             *)
-                echo -e "${RED}Please answer 'yes' or 'no'.${NC}"
+                echo -e "${RED}Пожалуйста, ответьте 'да' или 'нет'.${NC}"
                 ;;
         esac
     done
     
     echo ""
-    print_info "Updating 3X-UI Panel..."
+    print_info "Обновление панели 3X-UI..."
     cd "$INSTALL_DIR"
     
-    print_info "Step 1/3: Pulling new panel image..."
+    print_info "Шаг 1/3: Загрузка нового образа панели..."
     docker compose pull 3xui
     
     print_info "Step 2/3: Stopping and removing old container..."
@@ -2275,7 +2275,7 @@ update_services() {
     docker image prune -f
     
     print_success "3X-UI Panel updated successfully!"
-    echo -e "${YELLOW}Note: Database was not restarted.${NC}"
+    echo -e "${YELLOW}Примечание: Database was not restarted.${NC}"
 }
 
 # Get webBasePath from database
@@ -2438,7 +2438,7 @@ check_existing_certificates() {
                     found_cert=true
                     print_info "Found valid certificate in ${cert_dir} (expires: $expiry)"
                 else
-                    print_warning "Certificate in ${cert_dir} has expired"
+                    print_warning "Сертификат to ${cert_dir} has expired"
                     found_cert=false
                 fi
             fi
@@ -2549,26 +2549,26 @@ get_panel_status() {
             panel_port="2053"
         fi
         
-        # Determine address and protocol
+        # Determine address and proвcol
         local server_ip=$(get_server_ip)
-        local protocol="http"
+        local proвcol="http"
         
         if [[ "$has_cert" == "true" ]]; then
-            protocol="https"
+            proвcol="https"
             if [[ -n "$env_domain" ]]; then
-                panel_address="${protocol}://${env_domain}:${panel_port}"
+                panel_address="${proвcol}://${env_domain}:${panel_port}"
             elif load_config 2>/dev/null && [[ "$CERT_TYPE" == "letsencrypt-domain" && -n "$DOMAIN_OR_IP" ]]; then
-                panel_address="${protocol}://${DOMAIN_OR_IP}:${panel_port}"
+                panel_address="${proвcol}://${DOMAIN_OR_IP}:${panel_port}"
             elif load_config 2>/dev/null && [[ "$CERT_TYPE" == "letsencrypt-ip" && -n "$DOMAIN_OR_IP" ]]; then
-                panel_address="${protocol}://${DOMAIN_OR_IP}:${panel_port}"
+                panel_address="${proвcol}://${DOMAIN_OR_IP}:${panel_port}"
             else
-                panel_address="${protocol}://${server_ip}:${panel_port}"
+                panel_address="${proвcol}://${server_ip}:${panel_port}"
             fi
         else
             if load_config 2>/dev/null && [[ -n "$DOMAIN_OR_IP" ]] && ! is_ipv4 "$DOMAIN_OR_IP" && ! is_ipv6 "$DOMAIN_OR_IP"; then
-                panel_address="${protocol}://${DOMAIN_OR_IP}:${panel_port}"
+                panel_address="${proвcol}://${DOMAIN_OR_IP}:${panel_port}"
             else
-                panel_address="${protocol}://${server_ip}:${panel_port}"
+                panel_address="${proвcol}://${server_ip}:${panel_port}"
             fi
         fi
         
@@ -2596,7 +2596,7 @@ get_panel_status() {
 
 # Show service status
 show_status() {
-    print_info "3X-UI Service Status:"
+    print_info "3X-UI Статус сервисов:"
     echo ""
     cd "$INSTALL_DIR"
     docker compose ps
@@ -2802,7 +2802,7 @@ renew_certificate() {
     
     if [[ "$CERT_TYPE" == "letsencrypt-domain" ]]; then
         # Renew domain certificate
-        print_info "Renewing Let's Encrypt certificate for domain: $DOMAIN_OR_IP"
+        print_info "Renewing Let's Encrypt certificate for домен: $DOMAIN_OR_IP"
         
         # Stop containers to free port 80
         cd "$INSTALL_DIR"
@@ -2962,7 +2962,7 @@ uninstall() {
     
     print_success "3X-UI uninstalled successfully!"
     echo ""
-    echo -e "${YELLOW}Note: Script files and directories are preserved.${NC}"
+    echo -e "${YELLOW}Примечание: Script files and direcвries are preserved.${NC}"
     echo -e "${YELLOW}You can reinstall anytime by running: bash install.sh${NC}"
 }
 
@@ -3090,13 +3090,13 @@ remove_panel_port() {
     done
     echo ""
     
-    read -p "Enter port number to remove: " port_to_remove
+    read -p "Enter port number to remove: " port_в_remove
     
     # Find and remove port
     local new_ports=()
     local found=0
     for port in "${ADDITIONAL_PORTS[@]}"; do
-        if [[ "$port" != "$port_to_remove" ]]; then
+        if [[ "$port" != "$port_в_remove" ]]; then
             new_ports+=("$port")
         else
             found=1
@@ -3104,7 +3104,7 @@ remove_panel_port() {
     done
     
     if [[ $found -eq 0 ]]; then
-        print_error "Port $port_to_remove not found!"
+        print_error "Port $port_в_remove not found!"
         return 1
     fi
     
@@ -3121,7 +3121,7 @@ remove_panel_port() {
     docker compose down
     docker compose up -d
     
-    print_success "Port $port_to_remove removed and panel restarted!"
+    print_success "Port $port_в_remove removed and panel restarted!"
 }
 
 # Full installation wizard
@@ -3129,7 +3129,7 @@ install_wizard() {
     print_banner
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}          3X-UI NEW Installation Wizard${NC}"
+    echo -e "${WHITE}          3X-UI NEW Мастер установки${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
@@ -3138,25 +3138,25 @@ install_wizard() {
     
     # Step 1: Install Docker
     echo ""
-    echo -e "${PURPLE}[Step 1/7]${NC} Docker Installation"
+    echo -e "${PURPLE}[Шаг 1/7]${NC} Установка Docker"
     install_docker
     install_docker_compose
     
     # Step 2: Network mode
     echo ""
     echo -e "${PURPLE}[Step 2/7]${NC} Network Configuration"
-    echo -e "${CYAN}Choose network mode:${NC}"
-    echo "1) Host network (recommended for advanced users)"
-    echo "   - Direct access to all ports"
-    echo "   - Better performance"
-    echo "   - Requires manual port configuration in panel"
+    echo -e "${CYAN}Выберите режим сети:${NC}"
+    echo "1) Сеть хоста (рекомендуется для опытных пользователей)"
+    echo "   - Прямой доступ ко всем портам"
+    echo "   - Лучшая производительность"
+    echo "   - Требует ручной настройки портов в панели"
     echo ""
-    echo "2) Bridge network with port mapping (recommended)"
-    echo "   - Isolated containers"
-    echo "   - Easy port management"
-    echo "   - Need to expose inbound ports manually"
+    echo "2) Мостовая сеть с пробросом портов (рекомендуется)"
+    echo "   - Изолированные контейнеры"
+    echo "   - Удобное управление портами"
+    echo "   - Нужно вручную открывать входящие порты"
     echo ""
-    read -p "Select [1-2, default: 2]: " network_choice
+    read -p "Выберите [1-2, по умолчанию: 2]: " network_choice
     network_choice=${network_choice:-2}
     
     local network_mode="bridge"
@@ -3166,26 +3166,26 @@ install_wizard() {
     
     # Step 3: Port configuration
     echo ""
-    echo -e "${PURPLE}[Step 3/7]${NC} Port Configuration"
-    read -p "Panel port [$DEFAULT_PANEL_PORT]: " panel_port
+    echo -e "${PURPLE}[Шаг 3/7]${NC} Настройка портов"
+    read -p "Порт панели [$DEFAULT_PANEL_PORT]: " panel_port
     panel_port=${panel_port:-$DEFAULT_PANEL_PORT}
     
-    read -p "Subscription port [$DEFAULT_SUB_PORT]: " sub_port
+    read -p "Порт подписки [$DEFAULT_SUB_PORT]: " sub_port
     sub_port=${sub_port:-$DEFAULT_SUB_PORT}
     
     # Validate ports
     if ! [[ "$panel_port" =~ ^[0-9]+$ ]] || [ "$panel_port" -lt 1 ] || [ "$panel_port" -gt 65535 ]; then
-        print_error "Invalid panel port!"
+        print_error "Неверный порт панели!"
         exit 1
     fi
     if ! [[ "$sub_port" =~ ^[0-9]+$ ]] || [ "$sub_port" -lt 1 ] || [ "$sub_port" -gt 65535 ]; then
-        print_error "Invalid subscription port!"
+        print_error "Неверный порт подписки!"
         exit 1
     fi
     
     # Step 4: Database password
     echo ""
-    echo -e "${PURPLE}[Step 4/7]${NC} Database Configuration"
+    echo -e "${PURPLE}[Шаг 4/7]${NC} Настройка базы данных"
     echo -e "${CYAN}Database password options:${NC}"
     echo "1) Generate secure random password (recommended)"
     echo "2) Enter custom password"
@@ -3195,23 +3195,23 @@ install_wizard() {
     
     local db_password
     if [[ "$pwd_choice" == "2" ]]; then
-        read -sp "Enter database password: " db_password
+        read -sp "Введите пароль базы данных: " db_password
         echo ""
         if [[ ${#db_password} -lt 8 ]]; then
-            print_warning "Password is too short. Generating secure password instead."
+            print_warning "Пароль слишком короткий. Генерируется безопасный пароль."
             db_password=$(generate_password 24)
         fi
     else
         db_password=$(generate_password 24)
     fi
     
-    echo -e "${GREEN}Database password: $db_password${NC}"
-    echo -e "${YELLOW}Please save this password!${NC}"
+    echo -e "${GREEN}Пароль базы данных: $db_password${NC}"
+    echo -e "${YELLOW}Пожалуйста, сохраните этот пароль!${NC}"
     echo ""
     
     # Step 5: Create Docker Compose and start database first
     echo ""
-    echo -e "${PURPLE}[Step 5/7]${NC} Creating Docker Compose and Starting Database"
+    echo -e "${PURPLE}[Шаг 5/7]${NC} Создание Docker Compose и запуск базы данных"
     
     # Create installation directory
     mkdir -p "$INSTALL_DIR/cert"
@@ -3243,18 +3243,18 @@ install_wizard() {
     echo ""
     
     if [ $attempt -ge $max_attempts ]; then
-        print_warning "PostgreSQL might not be fully ready, but continuing..."
+        print_warning "PostgreSQL может быть не полностью готов, но продолжаем..."
     fi
     
     # Step 6: SSL Certificate
     echo ""
-    echo -e "${PURPLE}[Step 6/7]${NC} SSL Certificate Configuration"
+    echo -e "${PURPLE}[Шаг 6/7]${NC} Настройка SSL сертификата"
     local server_ip=$(get_server_ip)
-    echo -e "Your server IPv4: ${GREEN}$server_ip${NC}"
+    echo -e "IPv4 toашего сервера: ${GREEN}$server_ip${NC}"
     
     local detected_ipv6=$(get_server_ipv6)
     if [[ -n "$detected_ipv6" ]]; then
-        echo -e "Your server IPv6: ${GREEN}$detected_ipv6${NC}"
+        echo -e "IPv6 toашего сервера: ${GREEN}$detected_ipv6${NC}"
     fi
     
     # Initialize SSL variables
@@ -3298,16 +3298,16 @@ install_wizard() {
     print_banner
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║              Installation Completed Successfully!            ║${NC}"
+    echo -e "${GREEN}║              Установка успешно завершена!                    ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Login credentials:${NC}"
-    echo -e "  Username:  ${CYAN}admin${NC}"
-    echo -e "  Password:  ${CYAN}admin${NC}"
+    echo -e "${WHITE}Учетные данные для toхода:${NC}"
+    echo -e "  Имя пользователя:  ${CYAN}admin${NC}"
+    echo -e "  Пароль:  ${CYAN}admin${NC}"
     echo ""
-    echo -e "${YELLOW}⚠️  IMPORTANT: Please change your password after first login!${NC}"
+    echo -e "${YELLOW}⚠️  ВАЖНО: Пожалуйста, смените пароль после первого toхода!${NC}"
     echo ""
     
     # Get subscription info from env or use defaults
@@ -3358,41 +3358,41 @@ install_wizard() {
         echo ""
         echo -e "${GREEN}✓ SSL certificate configured${NC}"
         if [[ "$cert_type" == "letsencrypt-ip" ]]; then
-            echo -e "${YELLOW}  (IP certificate valid ~6 days, auto-renews via acme.sh)${NC}"
+            echo -e "${YELLOW}  (IP сертификат действителен ~6 дней, автоматически обновляется через acme.sh)${NC}"
         elif [[ "$cert_type" == "letsencrypt-domain" ]]; then
-            echo -e "${YELLOW}  (Domain certificate valid 90 days, auto-renews via acme.sh)${NC}"
+            echo -e "${YELLOW}  (Доменный сертификат действителен 90 дней, автоматически обновляется через acme.sh)${NC}"
         fi
         echo ""
-        echo -e "${WHITE}Panel is available at:${NC}"
+        echo -e "${WHITE}Панель доступна по адресу:${NC}"
         echo -e "  ${GREEN}${panel_address}${NC}"
         echo ""
-        echo -e "${WHITE}Subscription service is available at:${NC}"
+        echo -e "${WHITE}Сервис подписки доступен по адресу:${NC}"
         echo -e "  ${GREEN}${sub_address}${NC}"
         echo ""
     else
         panel_address="${panel_protocol}://${server_ip}:${panel_port}"
         sub_address="${sub_protocol}://${server_ip}:${actual_sub_port}"
         
-        echo -e "${WHITE}Panel is available at:${NC}"
+        echo -e "${WHITE}Панель доступна по адресу:${NC}"
         echo -e "  ${GREEN}${panel_address}${NC}"
         echo ""
-        echo -e "${WHITE}Subscription service is available at:${NC}"
+        echo -e "${WHITE}Сервис подписки доступен по адресу:${NC}"
         echo -e "  ${GREEN}${sub_address}${NC}"
         echo ""
-        echo -e "${YELLOW}Note: SSL certificate not configured. You can set it up later from the menu.${NC}"
+        echo -e "${YELLOW}Примечание: SSL сертификат не настроен. Вы можете настроить его позже из меню.${NC}"
         echo ""
     fi
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Database password:${NC} ${CYAN}$db_password${NC}"
-    echo -e "${YELLOW}(save it in a secure place)${NC}"
+    echo -e "${WHITE}Пароль базы данных:${NC} ${CYAN}$db_password${NC}"
+    echo -e "${YELLOW}(сохраните его to безопасном месте)${NC}"
     echo ""
     
     # Check if panel is accessible
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    print_info "Checking panel availability..."
+    print_info "Проверка доступности панели..."
     sleep 2
     
     local panel_accessible=false
@@ -3407,16 +3407,16 @@ install_wizard() {
     fi
     
     if [[ "$panel_accessible" == "true" ]]; then
-        echo -e "${GREEN}✓ Panel is accessible${NC}"
+        echo -e "${GREEN}✓ Панель доступна${NC}"
     else
-        echo -e "${YELLOW}⚠ Panel may still be starting. Please wait a few moments and try accessing it.${NC}"
+        echo -e "${YELLOW}⚠ Панель может еще запускаться. Пожалуйста, подождите несколько мгновений и попробуйте получить доступ.${NC}"
     fi
     echo ""
     
     # Show service status
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Service Status:${NC}"
+    echo -e "${WHITE}Статус сервисов:${NC}"
     cd "$INSTALL_DIR"
     if docker compose ps &>/dev/null; then
         docker compose ps 2>/dev/null
@@ -3428,16 +3428,16 @@ install_wizard() {
     # Check for updates
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    print_info "Checking for panel updates..."
+    print_info "Проверка обновлений панели..."
     local current_image=$(docker compose config 2>/dev/null | grep -E "^\s+image:" | head -n 1 | sed -E 's/^\s+image:\s*(.+)$/\1/' | tr -d '"' | tr -d "'")
     if [[ -n "$current_image" ]]; then
         # Try to pull latest image info (without actually pulling)
         docker manifest inspect "$current_image" &>/dev/null
         if [[ $? -eq 0 ]]; then
-            echo -e "${GREEN}✓ Panel image is available${NC}"
-            echo -e "${CYAN}  To check for updates, run: ${YELLOW}bash install.sh${NC} → ${YELLOW}2) Update Panel${NC}"
+            echo -e "${GREEN}✓ Образ панели доступен${NC}"
+            echo -e "${CYAN}  Для проверки обновлений запустите: ${YELLOW}bash install_ru.sh${NC} → ${YELLOW}2) Обновить панель${NC}"
         else
-            echo -e "${YELLOW}⚠ Could not check for updates (network issue or private registry)${NC}"
+            echo -e "${YELLOW}⚠ Не удалось проверить обновления (проблема с сетью или приватный реестр)${NC}"
         fi
     fi
     echo ""
@@ -3446,33 +3446,33 @@ install_wizard() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${WHITE}║                        INSTRUCTIONS                          ║${NC}"
+    echo -e "${WHITE}║                        ИНСТРУКЦИИ                          ║${NC}"
     echo -e "${WHITE}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Quick Start Guide:${NC}"
-    echo -e "  1. ${CYAN}Access the panel${NC} using the address above"
-    echo -e "  2. ${CYAN}Login${NC} with default credentials (admin/admin)"
-    echo -e "  3. ${CYAN}Change password${NC} immediately in Settings → Account"
-    echo -e "  4. ${CYAN}Add inbound${NC} in Inbounds section to start using the service"
-    echo -e "  5. ${CYAN}Create users${NC} and share subscription links"
-    echo -e "  6. ${CYAN}Connect nodes${NC} (optional): Install node service and register via API"
+    echo -e "${WHITE}Краткое руководство:${NC}"
+    echo -e "  1. ${CYAN}Доступ к панели${NC} используя адрес toыше"
+    echo -e "  2. ${CYAN}Вход${NC} с учетными данными по умолчанию (admin/admin)"
+    echo -e "  3. ${CYAN}Смена пароля${NC} немедленно to Настройки → Аккаунт"
+    echo -e "  4. ${CYAN}Добавить toходящее подключение${NC} in Inbounds section to start using the service"
+    echo -e "  5. ${CYAN}Создать пользователей${NC} и поделиться ссылками подписки"
+    echo -e "  6. ${CYAN}Подключить узлы${NC} (опционально): Установить сервис узла и зарегистрировать через API"
     echo ""
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Firewall Configuration:${NC}"
-    echo -e "  Make sure these ports are open in your firewall:"
-    echo -e "    - ${CYAN}${panel_port}${NC} (Panel Web UI)"
-    echo -e "    - ${CYAN}${actual_sub_port}${NC} (Subscription service)"
+    echo -e "${WHITE}Настройка файрвола:${NC}"
+    echo -e "  Убедитесь, что эти порты открыты to toашем файрволе:"
+    echo -e "    - ${CYAN}${panel_port}${NC} (Веб-интерфейс панели)"
+    echo -e "    - ${CYAN}${actual_sub_port}${NC} (Сервис подписки)"
     if [[ "$cert_type" != "none" ]]; then
-        echo -e "    - ${CYAN}80${NC} (HTTP, for Let's Encrypt renewal)"
+        echo -e "    - ${CYAN}80${NC} (HTTP, для обновления Let's Encrypt)"
     fi
-    echo -e "    - ${CYAN}443${NC} (HTTPS, if you plan to use it for inbounds)"
+    echo -e "    - ${CYAN}443${NC} (HTTPS, если toы планируете использовать его для toходящих подключений)"
     echo ""
-    echo -e "  ${YELLOW}Example UFW commands:${NC}"
+    echo -e "  ${YELLOW}Примеры команд UFW:${NC}"
     echo -e "    ${CYAN}ufw allow ${panel_port}/tcp${NC}"
     echo -e "    ${CYAN}ufw allow ${actual_sub_port}/tcp${NC}"
     if [[ "$cert_type" != "none" ]]; then
@@ -3483,73 +3483,73 @@ install_wizard() {
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Backup & Recovery:${NC}"
-    echo -e "  ${CYAN}Database location:${NC} ${GREEN}\$PWD/postgres_data${NC}"
+    echo -e "${WHITE}Резервное копирование и toосстановление:${NC}"
+    echo -e "  ${CYAN}Расположение базы данных:${NC} ${GREEN}\$PWD/postgres_data${NC}"
     echo ""
-    echo -e "  ${CYAN}Create backup:${NC}"
+    echo -e "  ${CYAN}Создать резервную копию:${NC}"
     echo -e "    ${CYAN}cd $INSTALL_DIR${NC}"
     echo -e "    ${CYAN}docker compose exec postgres pg_dump -U xui_user xui_db > backup_$(date +%Y%m%d_%H%M%S).sql${NC}"
     echo ""
-    echo -e "  ${CYAN}Restore backup:${NC}"
+    echo -e "  ${CYAN}Восстановить из резервной копии:${NC}"
     echo -e "    ${CYAN}docker compose exec -T postgres psql -U xui_user -d xui_db < backup.sql${NC}"
     echo ""
-    echo -e "  ${CYAN}Recover database password:${NC}"
-    echo -e "    Password is saved in: ${CYAN}$INSTALL_DIR/.3xui-config${NC}"
-    echo -e "    Or check docker-compose.yml: ${CYAN}XUI_DB_PASSWORD${NC}"
+    echo -e "  ${CYAN}Восстановить пароль базы данных:${NC}"
+    echo -e "    Пароль сохранен to: ${CYAN}$INSTALL_DIR/.3xui-config${NC}"
+    echo -e "    Или проверьте docker-compose.yml: ${CYAN}XUI_DB_PASSWORD${NC}"
     echo ""
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Monitoring & Logging:${NC}"
-    echo -e "  ${CYAN}View panel logs:${NC}"
+    echo -e "${WHITE}Мониторинг и логирование:${NC}"
+    echo -e "  ${CYAN}Просмотр логоto панели:${NC}"
     echo -e "    ${CYAN}docker compose logs -f 3xui${NC}"
     echo ""
-    echo -e "  ${CYAN}View database logs:${NC}"
+    echo -e "  ${CYAN}Просмотр логоto базы данных:${NC}"
     echo -e "    ${CYAN}docker compose logs -f postgres${NC}"
     echo ""
-    echo -e "  ${CYAN}View all logs:${NC}"
+    echo -e "  ${CYAN}Просмотр toсех логов:${NC}"
     echo -e "    ${CYAN}docker compose logs -f${NC}"
     echo ""
-    echo -e "  ${CYAN}Check service status:${NC}"
+    echo -e "  ${CYAN}Проверить статус сервисов:${NC}"
     echo -e "    ${CYAN}docker compose ps${NC}"
     echo ""
-    echo -e "  ${CYAN}Check resource usage:${NC}"
+    echo -e "  ${CYAN}Проверить использование ресурсов:${NC}"
     echo -e "    ${CYAN}docker stats${NC}"
     echo ""
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Advanced Configuration:${NC}"
+    echo -e "${WHITE}Расширенная настройка:${NC}"
     if [[ "$cert_type" != "none" ]]; then
-        echo -e "  ${CYAN}Separate domain for subscription:${NC}"
-        echo -e "    Edit ${CYAN}docker-compose.yml${NC} and set:"
+        echo -e "  ${CYAN}Отдельный домен для подписки:${NC}"
+        echo -e "    Отредактируйте ${CYAN}docker-compose.yml${NC} и установите:"
         echo -e "      ${CYAN}XUI_SUB_DOMAIN: sub.example.com${NC}"
         echo -e "      ${CYAN}XUI_SUB_CERT_FILE: /app/cert/sub-fullchain.pem${NC}"
         echo -e "      ${CYAN}XUI_SUB_KEY_FILE: /app/cert/sub-privkey.pem${NC}"
-        echo -e "    Then restart: ${CYAN}docker compose restart 3xui${NC}"
+        echo -e "    Затем перезапустите: ${CYAN}docker compose restart 3xui${NC}"
         echo ""
     fi
-    echo -e "  ${CYAN}Change panel domain/port:${NC}"
-    echo -e "    Edit ${CYAN}docker-compose.yml${NC} environment variables:"
+    echo -e "  ${CYAN}Изменить домен/порт панели:${NC}"
+    echo -e "    Отредактируйте ${CYAN}docker-compose.yml${NC} переменные окружения:"
     echo -e "      ${CYAN}XUI_WEB_DOMAIN${NC}, ${CYAN}XUI_WEB_PORT${NC}, ${CYAN}XUI_WEB_LISTEN${NC}"
-    echo -e "    Then restart: ${CYAN}docker compose restart 3xui${NC}"
+    echo -e "    Затем перезапустите: ${CYAN}docker compose restart 3xui${NC}"
     echo ""
-    echo -e "  ${CYAN}Change subscription port/path:${NC}"
-    echo -e "    Edit ${CYAN}docker-compose.yml${NC} environment variables:"
+    echo -e "  ${CYAN}Изменить порт/путь подписки:${NC}"
+    echo -e "    Отредактируйте ${CYAN}docker-compose.yml${NC} переменные окружения:"
     echo -e "      ${CYAN}XUI_SUB_PORT${NC}, ${CYAN}XUI_SUB_PATH${NC}, ${CYAN}XUI_SUB_DOMAIN${NC}"
-    echo -e "    Then restart: ${CYAN}docker compose restart 3xui${NC}"
+    echo -e "    Затем перезапустите: ${CYAN}docker compose restart 3xui${NC}"
     echo ""
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}Management:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
+    echo -e "${WHITE}Управление:${NC}"
+    echo -e "  ${CYAN}bash install.sh${NC} - открыть меню управления"
     echo ""
-    echo -e "  ${CYAN}Common commands:${NC}"
-    echo -e "    ${CYAN}docker compose restart 3xui${NC} - restart panel"
-    echo -e "    ${CYAN}docker compose restart postgres${NC} - restart database"
-    echo -e "    ${CYAN}docker compose down${NC} - stop all services"
-    echo -e "    ${CYAN}docker compose up -d${NC} - start all services"
+    echo -e "  ${CYAN}Общие команды:${NC}"
+    echo -e "    ${CYAN}docker compose restart 3xui${NC} - перезапустить панель"
+    echo -e "    ${CYAN}docker compose restart postgres${NC} - перезапустить базу данных"
+    echo -e "    ${CYAN}docker compose down${NC} - остановить toсе сервисы"
+    echo -e "    ${CYAN}docker compose up -d${NC} - запустить toсе сервисы"
     echo ""
 }
 
@@ -3559,7 +3559,7 @@ main_menu() {
         print_banner
         echo ""
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${WHITE}                    Management Menu${NC}"
+        echo -e "${WHITE}                    Меню управления${NC}"
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
         
@@ -3571,7 +3571,7 @@ main_menu() {
             local panel_address=$(echo "$status_info" | cut -d'|' -f3)
             local web_path=$(echo "$status_info" | cut -d'|' -f4)
             
-            echo -e "  ${WHITE}── Panel Status ──${NC}"
+            echo -e "  ${WHITE}── Статус панели ──${NC}"
             echo -e "  Status:  $(echo -e "$panel_status")"
             echo -e "  Port:    ${CYAN}$panel_port${NC}"
             if [[ -n "$web_path" ]] && [[ "$web_path" != "/" ]]; then
@@ -3581,44 +3581,44 @@ main_menu() {
             echo ""
         fi
         
-        echo -e "  ${WHITE}── Panel ──${NC}"
-        echo -e "  ${GREEN}1)${NC}  Install Panel"
-        echo -e "  ${GREEN}2)${NC}  Update Panel"
-        echo -e "  ${GREEN}3)${NC}  Start Panel"
-        echo -e "  ${GREEN}4)${NC}  Stop Panel"
-        echo -e "  ${GREEN}5)${NC}  Restart Panel"
-        echo -e "  ${GREEN}6)${NC}  Panel Status"
-        echo -e "  ${GREEN}7)${NC}  Panel Logs"
+        echo -e "  ${WHITE}── Панель ──${NC}"
+        echo -e "  ${GREEN}1)${NC}  Установить панель"
+        echo -e "  ${GREEN}2)${NC}  Обновить панель"
+        echo -e "  ${GREEN}3)${NC}  Запустить панель"
+        echo -e "  ${GREEN}4)${NC}  Остановить панель"
+        echo -e "  ${GREEN}5)${NC}  Перезапустить панель"
+        echo -e "  ${GREEN}6)${NC}  Статус панели"
+        echo -e "  ${GREEN}7)${NC}  Логи панели"
         echo ""
-        echo -e "  ${WHITE}── Panel Settings ──${NC}"
-        echo -e "  ${YELLOW}8)${NC}  Change Panel Port"
-        echo -e "  ${YELLOW}9)${NC}  Change Subscription Port"
-        echo -e "  ${YELLOW}10)${NC} Change Database Password"
-        echo -e "  ${YELLOW}11)${NC} Renew Panel Certificate"
-        echo -e "  ${YELLOW}12)${NC} Setup New Panel Certificate"
-        echo -e "  ${YELLOW}13)${NC} Add Panel Port"
-        echo -e "  ${YELLOW}14)${NC} Remove Panel Port"
-        echo -e "  ${YELLOW}15)${NC} Reset Panel to Defaults"
+        echo -e "  ${WHITE}── Настройки панели ──${NC}"
+        echo -e "  ${YELLOW}8)${NC}  Изменить порт панели"
+        echo -e "  ${YELLOW}9)${NC}  Изменить порт подписки"
+        echo -e "  ${YELLOW}10)${NC} Изменить пароль базы данных"
+        echo -e "  ${YELLOW}11)${NC} Обновить сертификат панели"
+        echo -e "  ${YELLOW}12)${NC} Настроить новый сертификат панели"
+        echo -e "  ${YELLOW}13)${NC} Добавить порт панели"
+        echo -e "  ${YELLOW}14)${NC} Удалить порт панели"
+        echo -e "  ${YELLOW}15)${NC} Сбросить панель к настройкам по умолчанию"
         echo ""
-        echo -e "  ${WHITE}── Node ──${NC}"
-        echo -e "  ${BLUE}20)${NC} Install Node"
-        echo -e "  ${BLUE}21)${NC} Update Node"
-        echo -e "  ${BLUE}22)${NC} Start Node"
-        echo -e "  ${BLUE}23)${NC} Stop Node"
-        echo -e "  ${BLUE}24)${NC} Restart Node"
-        echo -e "  ${BLUE}25)${NC} Node Status"
-        echo -e "  ${BLUE}26)${NC} Node Logs"
-        echo -e "  ${BLUE}27)${NC} Renew Node Certificate"
-        echo -e "  ${BLUE}28)${NC} Add Node Port"
-        echo -e "  ${BLUE}29)${NC} Remove Node Port"
-        echo -e "  ${BLUE}30)${NC} Reset Node"
+        echo -e "  ${WHITE}── Узел ──${NC}"
+        echo -e "  ${BLUE}20)${NC} Установить узел"
+        echo -e "  ${BLUE}21)${NC} Обновить узел"
+        echo -e "  ${BLUE}22)${NC} Запустить узел"
+        echo -e "  ${BLUE}23)${NC} Остановить узел"
+        echo -e "  ${BLUE}24)${NC} Перезапустить узел"
+        echo -e "  ${BLUE}25)${NC} Статус узла"
+        echo -e "  ${BLUE}26)${NC} Логи узла"
+        echo -e "  ${BLUE}27)${NC} Обновить сертификат узла"
+        echo -e "  ${BLUE}28)${NC} Добавить порт узла"
+        echo -e "  ${BLUE}29)${NC} Удалить порт узла"
+        echo -e "  ${BLUE}30)${NC} Сбросить узел"
         echo ""
-        echo -e "  ${RED}99)${NC} Uninstall Panel"
-        echo -e "  ${WHITE}0)${NC}  Exit"
+        echo -e "  ${RED}99)${NC} Удалить панель"
+        echo -e "  ${WHITE}0)${NC}  Выход"
         echo ""
         echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
-        read -p "Select option: " choice
+        read -p "Выберите опцию: " choice
         
         case $choice in
             # Panel options
@@ -3629,7 +3629,7 @@ main_menu() {
             5) 
                 cd "$INSTALL_DIR"
                 docker compose restart
-                print_success "Panel restarted!"
+                print_success "Панель перезапущена!"
                 ;;
             6) show_status ;;
             7) show_logs ;;
