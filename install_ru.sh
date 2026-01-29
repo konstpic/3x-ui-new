@@ -58,7 +58,7 @@ print_error() { echo -e "${RED}[ОШИБКА]${NC} $1"; }
 check_root() {
     if [[ $EUID -ne 0 ]]; then
         print_error "Этот скрипт должен быть запущен от имени root!"
-        echo -e "Пожалуйста, запустите: ${YELLOW}sudo bash install_ru.sh${NC}"
+        echo -e "Пожалуйста, запустите: ${YELLOW}sudo ./install_ru.sh${NC}"
         exit 1
     fi
 }
@@ -1856,7 +1856,7 @@ NODECONFIG
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}Управление:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - открыть меню управления"
+    echo -e "  ${CYAN}./install_ru.sh${NC} - открыть меню управления"
     echo ""
 }
 
@@ -2976,7 +2976,7 @@ show_instructions() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}Управление:${NC}"
-    echo -e "  ${CYAN}bash install_ru.sh${NC} - открыть меню управления"
+    echo -e "  ${CYAN}./install_ru.sh${NC} - открыть меню управления"
     echo ""
     echo -e "  ${CYAN}Общие команды:${NC}"
     echo -e "    ${CYAN}docker compose restart sharx${NC} - перезапустить панель"
@@ -3355,7 +3355,7 @@ uninstall() {
     print_success "SharX успешно удален!"
     echo ""
     echo -e "${YELLOW}Примечание: Файлы скриптов и директории сохранены.${NC}"
-    echo -e "${YELLOW}Вы можете переустановить в любое время, запустив: bash install_ru.sh${NC}"
+    echo -e "${YELLOW}Вы можете переустановить в любое время, запустив: ./install_ru.sh${NC}"
 }
 
 # Reset panel to default settings (clear database)
@@ -3827,7 +3827,7 @@ install_wizard() {
         docker manifest inspect "$current_image" &>/dev/null
         if [[ $? -eq 0 ]]; then
             echo -e "${GREEN}✓ Образ панели доступен${NC}"
-            echo -e "${CYAN}  Для проверки обновлений запустите: ${YELLOW}bash install_ru.sh${NC} → ${YELLOW}2) Обновить панель${NC}"
+            echo -e "${CYAN}  Для проверки обновлений запустите: ${YELLOW}./install_ru.sh${NC} → ${YELLOW}2) Обновить панель${NC}"
         else
             echo -e "${YELLOW}⚠ Не удалось проверить обновления (проблема с сетью или приватный реестр)${NC}"
         fi

@@ -80,7 +80,7 @@
 ```bash
 git clone https://github.com/konstpic/3x-ui-new.git
 cd 3x-ui-new
-sudo bash install.sh
+sudo ./install_ru.sh
 ```
 
 ### Что делает скрипт
@@ -109,7 +109,7 @@ sudo bash install.sh
 ### Установка панели через скрипт
 
 ```bash
-sudo bash install.sh
+sudo ./install_ru.sh
 ```
 
 Выберите **1) Install Panel** и следуйте подсказкам:
@@ -121,7 +121,7 @@ sudo bash install.sh
 ### Установка узла через скрипт
 
 ```bash
-sudo bash install.sh
+sudo ./install_ru.sh
 ```
 
 Выберите **2) Install Node** и следуйте подсказкам:
@@ -134,7 +134,7 @@ sudo bash install.sh
 После установки запустите скрипт снова для доступа к меню управления:
 
 ```bash
-sudo bash install.sh
+sudo ./install_ru.sh
 ```
 
 **Доступные опции:**
@@ -146,7 +146,7 @@ sudo bash install.sh
 ### Обновление панели/узла
 
 ```bash
-sudo bash install.sh
+sudo ./install_ru.sh
 # Выберите: 2) Update Panel или 21) Update Node
 ```
 

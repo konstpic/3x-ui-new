@@ -58,7 +58,7 @@ print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 check_root() {
     if [[ $EUID -ne 0 ]]; then
         print_error "This script must be run as root!"
-        echo -e "Please run: ${YELLOW}sudo bash install.sh${NC}"
+        echo -e "Please run: ${YELLOW}sudo ./install.sh${NC}"
         exit 1
     fi
 }
@@ -1856,7 +1856,7 @@ NODECONFIG
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}Management:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
+    echo -e "  ${CYAN}./install.sh${NC} - open management menu"
     echo ""
 }
 
@@ -2975,7 +2975,7 @@ show_instructions() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}Management:${NC}"
-    echo -e "  ${CYAN}bash install.sh${NC} - open management menu"
+    echo -e "  ${CYAN}./install.sh${NC} - open management menu"
     echo ""
     echo -e "  ${CYAN}Common commands:${NC}"
     echo -e "    ${CYAN}docker compose restart sharx${NC} - restart panel"
@@ -3354,7 +3354,7 @@ uninstall() {
     print_success "SharX uninstalled successfully!"
     echo ""
     echo -e "${YELLOW}Note: Script files and directories are preserved.${NC}"
-    echo -e "${YELLOW}You can reinstall anytime by running: bash install.sh${NC}"
+    echo -e "${YELLOW}You can reinstall anytime by running: ./install.sh${NC}"
 }
 
 # Reset panel to default settings (clear database)
@@ -3826,7 +3826,7 @@ install_wizard() {
         docker manifest inspect "$current_image" &>/dev/null
         if [[ $? -eq 0 ]]; then
             echo -e "${GREEN}✓ Panel image is available${NC}"
-            echo -e "${CYAN}  To check for updates, run: ${YELLOW}bash install.sh${NC} → ${YELLOW}2) Update Panel${NC}"
+            echo -e "${CYAN}  To check for updates, run: ${YELLOW}./install.sh${NC} → ${YELLOW}2) Update Panel${NC}"
         else
             echo -e "${YELLOW}⚠ Could not check for updates (network issue or private registry)${NC}"
         fi
