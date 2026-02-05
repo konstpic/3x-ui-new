@@ -144,6 +144,11 @@ install_docker_apt() {
     # Install Docker
     apt-get update -y
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    
+    # Enable BBR
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    sysctl -p
 }
 
 # Install Docker - Fedora
@@ -159,6 +164,11 @@ install_docker_dnf() {
     
     # Install Docker
     dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    # Enable BBR
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    sysctl -p
 }
 
 # Install Docker - CentOS/RHEL
@@ -174,6 +184,11 @@ install_docker_yum() {
     
     # Install Docker
     yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    # Enable BBR
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    sysctl -p
 }
 
 # Install Docker - Arch Linux
@@ -183,6 +198,11 @@ install_docker_pacman() {
     
     # Install Docker
     pacman -S --noconfirm docker docker-compose
+
+    # Enable BBR
+    echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX.conf
+    sysctl --system
 }
 
 # Install Docker - Alpine
@@ -251,6 +271,7 @@ install_docker() {
     # Verify installation
     if command -v docker &> /dev/null; then
         print_success "Docker installed successfully!"
+        print_success "BBR enabled!"
     else
         print_error "Docker installation failed!"
         exit 1

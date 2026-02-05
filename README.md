@@ -30,7 +30,7 @@ This version brings significant improvements, a modern architecture, streamlined
 ```bash
 git clone https://github.com/konstpic/SharX.git
 cd SharX
-sudo bash install.sh
+sudo bash ./install_ru.sh
 ```
 
 ---
@@ -72,11 +72,21 @@ sudo ./install.sh
 # Select: 1) Install Panel
 ```
 
-#### Node Installation / Установка узла
+```bash
+sudo ./install_ru.sh
+# Выбрать: 1) Установить панель
+```
+
+#### Node Installation / Установка узла 
 
 ```bash
 sudo ./install.sh
 # Select: 2) Install Node
+```
+
+```bash
+sudo ./install_ru.sh
+# Выбрать: 2) Установить узел
 ```
 
 #### Management Menu / Меню управления
