@@ -2239,13 +2239,13 @@ curl -x socks5h://127.0.0.1:4000 https://www.cloudflare.com/cdn-cgi/trace
     echo "-----------------------------------------------------------------"
     echo "			ГОТОВО!"
     echo "	Ваш внешний прокси: SOCKS5 или HTTP"
-    echo "	Адрес: $(curl -s -4 https://ifconfig.me):${port}"
+    echo "	Адрес: $(curl -s -4 curl ident.me):${port}"
     echo "	Логин: ${login}"
     echo "	Пароль: ${password}"
     echo "	Ваш внутренний прокси SOCKS (без логина и пароля)"
     echo "	127.0.0.1:4000"
     echo "-----------------------------------------------------------------"
-    echo "\e[0m"
+    echo -e "\e[0m"
 }
 
 # Save configuration
