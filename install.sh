@@ -148,8 +148,8 @@ install_docker_apt() {
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     
     # Enable BBR
-    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX-BBR.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX-BBR.conf
     sysctl -p
 }
 
@@ -168,8 +168,8 @@ install_docker_dnf() {
     dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     # Enable BBR
-    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX-BBR.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX-BBR.conf
     sysctl -p
 }
 
@@ -188,8 +188,8 @@ install_docker_yum() {
     yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     # Enable BBR
-    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX-BBR.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX-BBR.conf
     sysctl -p
 }
 
@@ -202,9 +202,9 @@ install_docker_pacman() {
     pacman -S --noconfirm docker docker-compose
 
     # Enable BBR
-    echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX.conf
-    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX.conf
-    sysctl --system
+    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/99-SharX-BBR.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.d/99-SharX-BBR.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/99-SharX-BBR.conf
+    sysctl -p
 }
 
 # Install Docker - Alpine
@@ -273,7 +273,7 @@ install_docker() {
     # Verify installation
     if command -v docker &> /dev/null; then
         print_success "Docker installed successfully!"
-        print_success "BBR enabled!"
+        print_success "BBR is enabled..."
     else
         print_error "Docker installation failed!"
         exit 1
@@ -2164,6 +2164,88 @@ remove_node_port() {
 # ============================================
 # END NODE FUNCTIONS
 # ============================================
+warp_install() {
+    echo -e "\e[38;2;0;255;255m--- 1. Cloudflare WARP install ---\e[0m"
+curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+sudo apt update && sudo apt install cloudflare-warp -y
+
+echo -e "\e[38;2;0;255;255m--- 2. Setting WARP in proxy mode ---\e[0m"
+warp-cli registration new
+warp-cli mode proxy
+warp-cli proxy port 4000
+warp-cli connect
+
+echo -e "\e[38;2;0;255;255m--- 3. GOST install (входной мост) ---\e[0m"
+GOST_VERSION="3.0.0-rc10"
+wget https://github.com/go-gost/gost/releases/download/v${GOST_VERSION}/gost_${GOST_VERSION}_linux_amd64.tar.gz
+tar -xvzf gost_${GOST_VERSION}_linux_amd64.tar.gz
+sudo mv gost /usr/bin/
+rm gost_${GOST_VERSION}_linux_amd64.tar.gz README* LICENSE*
+
+echo -e "\e[38;2;0;255;255m--- 4. Creating autostart service for GOST ---\e[0m"
+sudo tee /etc/systemd/system/gost.service > /dev/null <<EOF
+[Unit]
+Description=Gost Proxy Bridge
+After=network.target warp-svc.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/gost -L PROXY_USER:PROXY_PASS@:PROXY_PORT -F socks5://127.0.0.1:4000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+while true; do
+	read -p "Please enter your login for proxy: " login
+	if [ -z "$login" ]; then
+		echo -e "\e[91mWhat?\e[0m"
+	continue
+	fi
+	break
+done
+sed -i 's/PROXY_USER/'$login'/g' /etc/systemd/system/gost.service
+while true; do
+        read -p "Please enter your pass for proxy: " password
+	if [ -z "$password" ]; then
+		echo -e "\e[91mWhat?\e[0m"
+	continue
+	fi
+	break
+done
+sed -i 's/PROXY_PASS/'$password'/g' /etc/systemd/system/gost.service
+while true; do
+	read -p "Enter port for proxy: " port
+	if [ -z "$port" ]; then
+		echo -e "\e[91mWhat?\e[0m"
+	continue
+	fi
+	break
+done
+sed -i 's/PROXY_PORT/'$port'/g' /etc/systemd/system/gost.service /etc/systemd/system/gost.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now gost
+
+echo -e "		\e[38;2;0;255;255m--- Успех! ---\e[0m"
+sleep 5
+clear
+ss -tlnp | grep 4000
+curl -x socks5h://127.0.0.1:4000 https://www.cloudflare.com/cdn-cgi/trace
+
+    echo -e "\e[38;2;0;255;255m"
+    echo "-----------------------------------------------------------------"
+    echo "			READY!"
+    echo "	Your external proxy: SOCKS5 или HTTP"
+    echo "	Addr: $(curl -s -4 curl ident.me):${port}"
+    echo "	Login: ${login}"
+    echo "	Password: ${password}"
+    echo "	Your internal proxy SOCKS (without authentication)"
+    echo "	127.0.0.1:4000"
+    echo "-----------------------------------------------------------------"
+    echo -e "\e[0m"
+}
 
 # Save configuration
 save_config() {
@@ -3949,6 +4031,8 @@ main_menu() {
         echo -e "  ${LIME}39)${NC} Remove Node Port"
         echo -e "  ${LIME}40)${NC} Reset Node"
         echo ""
+        echo -e "  ${WHITE}── Additionally ──${NC}"
+        echo -e "  ${CYAN}50)${NC} WARP install"
         echo -e "  ${RED}99)${NC} Uninstall Panel"
         echo -e "  ${WHITE}0)${NC}  Exit"
         echo ""
@@ -4027,6 +4111,7 @@ main_menu() {
             40) reset_node ;;
             
             # Other
+            50) warp_install ;;
             99) uninstall ;;
             0) 
                 echo -e "${GREEN}Goodbye!${NC}"
