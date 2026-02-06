@@ -148,8 +148,8 @@ install_docker_apt() {
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     
     # Enable BBR
-    grep -qxF "net.core.default_qdisc=fq" /etc/sysctl.conf || echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    grep -qxF "net.core.default_qdisc=fq" /etc/systemd/system/bbr-sharx.conf || echo "net.core.default_qdisc=fq" >> /etc/systemd/system/bbr-sharx.conf
+    grep -qxF "net.ipv4.tcp_congestion_control=bbr" /etc/systemd/system/bbr-sharx.conf || echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/systemd/system/bbr-sharx.conf
     sysctl -p
 }
 
