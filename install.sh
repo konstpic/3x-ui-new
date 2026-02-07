@@ -1513,7 +1513,7 @@ update_node() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                    ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${RED}Before updating the node, we STRONGLY RECOMMEND creating a backup!${NC}"
@@ -1851,7 +1851,7 @@ NODECONFIG
     print_banner
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║            Node Installation Completed Successfully!         ║${NC}"
+    echo -e "${GREEN}║            Node Installation Completed Successfully!          ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -2330,7 +2330,7 @@ update_services() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                    ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${RED}Before updating, we STRONGLY RECOMMEND creating a database backup!${NC}"
@@ -2941,7 +2941,7 @@ show_instructions() {
     print_banner
     echo ""
     echo -e "${WHITE}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${WHITE}║                        INSTRUCTIONS                          ║${NC}"
+    echo -e "${WHITE}║                        INSTRUCTIONS                           ║${NC}"
     echo -e "${WHITE}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -3806,7 +3806,7 @@ install_wizard() {
     print_banner
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║              Installation Completed Successfully!            ║${NC}"
+    echo -e "${GREEN}║              Installation Completed Successfully!             ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
