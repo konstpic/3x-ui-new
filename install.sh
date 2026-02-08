@@ -1513,7 +1513,7 @@ update_node() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                    ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${RED}Before updating the node, we STRONGLY RECOMMEND creating a backup!${NC}"
@@ -1851,7 +1851,7 @@ NODECONFIG
     print_banner
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║            Node Installation Completed Successfully!         ║${NC}"
+    echo -e "${GREEN}║            Node Installation Completed Successfully!          ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -2247,6 +2247,18 @@ curl -x socks5h://127.0.0.1:4000 https://www.cloudflare.com/cdn-cgi/trace
     echo -e "\e[0m"
 }
 
+# WARP uninstall
+warp_uninstall() {
+    systemctl daemon-reload
+    systemctl disable gost.service
+    systemctl stop gost.service
+    rm /usr/bin/gost
+    warp-cli registration delete
+    warp-cli disconnect
+    apt purge cloudflare-warp -y
+    apt autoremove -y
+}
+
 # Save configuration
 save_config() {
     local panel_port="$1"
@@ -2318,7 +2330,7 @@ update_services() {
     print_banner
     echo ""
     echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                      ║${NC}"
+    echo -e "${YELLOW}║                  ⚠️  IMPORTANT WARNING ⚠️                    ║${NC}"
     echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${RED}Before updating, we STRONGLY RECOMMEND creating a database backup!${NC}"
@@ -2929,7 +2941,7 @@ show_instructions() {
     print_banner
     echo ""
     echo -e "${WHITE}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${WHITE}║                        INSTRUCTIONS                          ║${NC}"
+    echo -e "${WHITE}║                        INSTRUCTIONS                           ║${NC}"
     echo -e "${WHITE}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -3794,7 +3806,7 @@ install_wizard() {
     print_banner
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║              Installation Completed Successfully!            ║${NC}"
+    echo -e "${GREEN}║              Installation Completed Successfully!             ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -4033,6 +4045,7 @@ main_menu() {
         echo ""
         echo -e "  ${WHITE}── Additionally ──${NC}"
         echo -e "  ${CYAN}50)${NC} WARP install"
+        echo -e "  ${RED}98)${NC} Uninstall WARP"
         echo -e "  ${RED}99)${NC} Uninstall Panel"
         echo -e "  ${WHITE}0)${NC}  Exit"
         echo ""
@@ -4112,6 +4125,7 @@ main_menu() {
             
             # Other
             50) warp_install ;;
+            98) warp_uninstall ;;
             99) uninstall ;;
             0) 
                 echo -e "${GREEN}Goodbye!${NC}"
