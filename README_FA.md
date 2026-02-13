@@ -277,7 +277,7 @@ docker-compose down -v
 
 ## مستندات API
 
-* **[API Documentation](docs/API.md)**: توضیح کامل REST API، احراز هویت و مثال‌ها
+* **[مستندات API](docs/API.md)**: توضیح کامل REST API، احراز هویت و مثال‌ها
 
 ---
 
