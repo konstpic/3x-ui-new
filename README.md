@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[English](README_EN.md) | [Русский](README_RU.md)
+[English](README_EN.md) | [Русский](README_RU.md) | [فارسی](README_FA.md)
 
 </div>
 
