@@ -124,6 +124,15 @@ sudo ./install.sh
 2. **Configure `docker-compose.yml` / Настройте `docker-compose.yml`:**
    - Change `change_this_password` to a secure password
    - Измените `change_this_password` на надёжный пароль
+   - **Specify image version / Укажите версию образа:** You can manually set a specific version tag in the `image` field
+   - **Указать версию образа:** Вы можете вручную указать конкретную версию в поле `image`
+   ```yaml
+   services:
+     sharx:
+       image: registry.konstpic.ru/sharx/sharx:latest  # Specify version here / Укажите версию здесь
+     postgres:
+       image: registry.konstpic.ru/sharx/postgres:16-alpine
+   ```
    ```yaml
    XUI_DB_PASSWORD: your_secure_password
    POSTGRES_PASSWORD: your_secure_password
@@ -157,19 +166,28 @@ sudo ./install.sh
    cd node
    ```
 
-2. **Prepare certificates / Подготовьте сертификаты:**
+2. **Configure `docker-compose.yml` / Настройте `docker-compose.yml`:**
+   - **Specify image version / Укажите версию образа:** You can manually set a specific version tag
+   - **Указать версию образа:** Вы можете вручную указать конкретную версию
+   ```yaml
+   services:
+     node:
+       image: registry.konstpic.ru/sharx/sharxnode:latest  # Specify version here / Укажите версию здесь
+   ```
+
+3. **Prepare certificates / Подготовьте сертификаты:**
    ```bash
    mkdir -p cert
    cp /path/to/fullchain.pem cert/fullchain.pem
    cp /path/to/privkey.pem cert/privkey.pem
    ```
 
-3. **Start the node / Запустите узел:**
+4. **Start the node / Запустите узел:**
    ```bash
    docker compose up -d
    ```
 
-4. **Connect to panel / Подключите к панели:**
+5. **Connect to panel / Подключите к панели:**
    - Add new node in panel's Node Management
    - Добавьте новый узел в управлении узлами панели
 

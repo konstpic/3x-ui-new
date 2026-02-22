@@ -1,6 +1,6 @@
 services:
   sharx:
-    image: registry.konstpic.ru/3x-ui/3xui:3.0.0b
+    image: registry.konstpic.ru/sharx/sharx:latest
     container_name: sharx_app
     # hostname: yourhostname
     ports:
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: registry.konstpic.ru/3x-ui/postgres:16-alpine
+    image: registry.konstpic.ru/sharx/postgres:16-alpine
     container_name: sharx_postgres
     ports:
       - "5432:5432"

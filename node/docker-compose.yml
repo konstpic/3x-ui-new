@@ -1,6 +1,6 @@
 services:
   node:
-    image: registry.konstpic.ru/3x-ui/node:3.0.0b
+    image: registry.konstpic.ru/sharx/sharxnode:latest
     container_name: 3x-ui-node
     restart: unless-stopped
     ports:

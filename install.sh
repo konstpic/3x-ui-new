@@ -1231,7 +1231,7 @@ create_compose_host() {
     cat > "$INSTALL_DIR/$COMPOSE_FILE" << EOF
 services:
   sharx:
-    image: registry.konstpic.ru/3x-ui/3xui:3.0.0b
+    image: registry.konstpic.ru/sharx/sharx:latest
     container_name: sharx_app
     network_mode: host
     volumes:
@@ -1259,7 +1259,7 @@ $(echo -e "$env_vars")
     restart: unless-stopped
 
   postgres:
-    image: registry.konstpic.ru/3x-ui/postgres:16-alpine
+    image: registry.konstpic.ru/sharx/postgres:16-alpine
     container_name: sharx_postgres
     network_mode: host
     environment:
@@ -1304,7 +1304,7 @@ create_compose_bridge() {
     cat > "$INSTALL_DIR/$COMPOSE_FILE" << EOF
 services:
   sharx:
-    image: registry.konstpic.ru/3x-ui/3xui:3.0.0b
+    image: registry.konstpic.ru/sharx/sharx:latest
     container_name: sharx_app
     ports:
 $(echo -e "$ports_section")
@@ -1348,7 +1348,7 @@ $(echo -e "$env_vars")
     restart: unless-stopped
 
   postgres:
-    image: registry.konstpic.ru/3x-ui/postgres:16-alpine
+    image: registry.konstpic.ru/sharx/postgres:16-alpine
     container_name: sharx_postgres
     ports:
       - "5432:5432"
@@ -1387,7 +1387,7 @@ create_node_compose_host() {
     cat > "$NODE_DIR/$COMPOSE_FILE" << EOF
 services:
   node:
-    image: registry.konstpic.ru/3x-ui/node:3.0.0b
+    image: registry.konstpic.ru/sharx/sharxnode:latest
     container_name: sharx-node
     network_mode: host
     restart: unless-stopped
@@ -1422,7 +1422,7 @@ create_node_compose_bridge() {
     cat > "$NODE_DIR/$COMPOSE_FILE" << EOF
 services:
   node:
-    image: registry.konstpic.ru/3x-ui/node:3.0.0b
+    image: registry.konstpic.ru/sharx/sharxnode:latest
     container_name: sharx-node
     restart: unless-stopped
     ports:
