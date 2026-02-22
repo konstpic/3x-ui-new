@@ -225,6 +225,12 @@ For detailed installation instructions, configuration, and migration guide, plea
 - **[Полная русская документация](README_RU.md)** - Полное руководство на русском языке
 - **[API Documentation](docs/API.md)** - REST API reference / Справочник REST API
 
+## For Developers / Для разработчиков
+
+Source code repository / Репозиторий исходного кода:
+
+- **[Source Code Repository](https://github.com/konstpic/sharx-code)** - Main codebase for SharX panel and node / Основной репозиторий кода панели SharX и узла
+
 ## Requirements / Требования
 
 - Linux server (Ubuntu, Debian, CentOS, Fedora, Arch, Alpine, openSUSE)
